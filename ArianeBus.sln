@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleWriter", "src\ConsoleWriter\ConsoleWriter.csproj", "{3D5A8F99-2E46-4281-88CE-A3F2DC57B37A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleReader", "src\ConsoleReader\ConsoleReader.csproj", "{A1544ED2-3386-4387-A61E-D2DD4BBDD6E4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArianeBus", "src\ArianeBus\ArianeBus.csproj", "{AA25D8EF-980D-4467-A0AE-8A043584F292}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3FDD00DF-8EE5-4D84-B91D-7A9B23F7D00A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArianeBus.Tests", "src\ArianeBus.Tests\ArianeBus.Tests.csproj", "{3332DE5E-BDE5-4F3C-A381-15E92E0FE592}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3D5A8F99-2E46-4281-88CE-A3F2DC57B37A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D5A8F99-2E46-4281-88CE-A3F2DC57B37A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D5A8F99-2E46-4281-88CE-A3F2DC57B37A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D5A8F99-2E46-4281-88CE-A3F2DC57B37A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1544ED2-3386-4387-A61E-D2DD4BBDD6E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1544ED2-3386-4387-A61E-D2DD4BBDD6E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1544ED2-3386-4387-A61E-D2DD4BBDD6E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1544ED2-3386-4387-A61E-D2DD4BBDD6E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA25D8EF-980D-4467-A0AE-8A043584F292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA25D8EF-980D-4467-A0AE-8A043584F292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA25D8EF-980D-4467-A0AE-8A043584F292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA25D8EF-980D-4467-A0AE-8A043584F292}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3332DE5E-BDE5-4F3C-A381-15E92E0FE592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3332DE5E-BDE5-4F3C-A381-15E92E0FE592}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3332DE5E-BDE5-4F3C-A381-15E92E0FE592}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3332DE5E-BDE5-4F3C-A381-15E92E0FE592}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D37A0D7-2CB5-4FA7-B5C0-ABE7E74D0DB8}
+	EndGlobalSection
+EndGlobal
