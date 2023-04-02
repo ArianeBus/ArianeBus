@@ -8,18 +8,18 @@ Send and Receive messages massively with Azure Bus
 
 > PM> Install-Package ArianeBus
 
-Create IRequest Message
+Create Message
 
 ```csharp
-public class SampleMessageRequest
+public class SampleMessage
 {
     public Guid MessageId { get; set; } = Guid.NewGuid();
     public int RowNumber { get; set; }
 
-	public override string ToString()
-	{
-		return $"{MessageId}.{RowNumber}";
-	}
+    public override string ToString()
+    {
+        return $"{MessageId}.{RowNumber}";
+    }
 }
 ```
 
@@ -39,8 +39,8 @@ var app = builder.Build();
 
 var bus = sp.GetRequiredService<IServiceBus>();
 
-var request = new ConsoleWriter.SampleMessageRequest() { RowNumber = 1 };
-await bus.EnqueueMessage("test1", request);
+var message = new ConsoleWriter.SampleMessage() { RowNumber = 1 };
+await bus.EnqueueMessage("test1", message);
 
 ```
 
@@ -49,18 +49,18 @@ ArianeBus create queue if not exists and send the request in Azure Bus
 Next Create MessageReader
 
 ```csharp
-internal class SampleMessageReader : MessageReaderBase<SampleMessageRequest>
+internal class SampleMessageReader : MessageReaderBase<SampleMessage>
 {
-	private readonly ILogger<SampleMessageRequestHandler> _logger;
+	private readonly ILogger _logger;
 
 	public SampleMessageRequestHandler(ILogger<SampleMessageRequestHandler> logger)
 	{
 		_logger = logger;
 	}
 
-	public Task ProcessMessageAsync(SampleMessageRequest request, CancellationToken cancellationToken)
+	public Task ProcessMessageAsync(SampleMessage message, CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Request : {request}", request);
+		_logger.LogInformation("Message : {message}", message);
 		return Task.CompletedTask;
 	}
 }
