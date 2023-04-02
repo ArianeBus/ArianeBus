@@ -44,7 +44,7 @@ await bus.EnqueueMessage("test1", request);
 
 ```
 
-ArianeBus create queue if not exists and Send the request in Azure Bus using MediatR
+ArianeBus create queue if not exists and send the request in Azure Bus
 
 Next Create MessageReader
 

@@ -30,7 +30,7 @@ services.AddLogging(config =>
 
 var sp = services.BuildServiceProvider();
 
-var mediator = sp.GetRequiredService<IServiceBus>();
+var bus = sp.GetRequiredService<IServiceBus>();
 
 Console.WriteLine("Start send messages");
 var sw = new Stopwatch();
@@ -39,7 +39,7 @@ var messageCount = 451;
 for (int i = 0; i < messageCount; i++)
 {
 	var request = new ConsoleWriter.SampleMessageRequest() { RowNumber = i };
-	await mediator.EnqueueMessage("test1", request);
+	await bus.EnqueueMessage("test1", request);
 }
 
 sw.Stop();

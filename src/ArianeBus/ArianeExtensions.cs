@@ -1,12 +1,15 @@
-﻿namespace ArianeBus;
+﻿using Azure.Messaging.ServiceBus;
+using System.Runtime;
+
+namespace ArianeBus;
 
 public static class ArianeExtensions
 {
 	internal static async Task CreateTopicAndSubscriptionIfNotExists(this ArianeSettings settings,
-								string topicName,
-								string subscriptionName,
-								ILogger logger,
-								CancellationToken cancellationToken)
+		string topicName,
+		string subscriptionName,
+		ILogger logger,
+		CancellationToken cancellationToken)
 	{
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
 		var topicExists = await managementClient.TopicExistsAsync(topicName, cancellationToken);
@@ -68,6 +71,22 @@ public static class ArianeExtensions
 
 			logger.LogInformation("Azure queue {queueName} created", queueName);
 		}
+	}
+
+	internal static ServiceBusClient CreateServiceBusClient(this ArianeSettings settings)
+	{
+		var client = new ServiceBusClient(settings.BusConnectionString, new ServiceBusClientOptions
+		{
+			TransportType = ServiceBusTransportType.AmqpTcp,
+			RetryOptions = new ServiceBusRetryOptions()
+			{
+				Mode = ServiceBusRetryMode.Exponential,
+				MaxRetries = 3,
+				MaxDelay = TimeSpan.FromSeconds(10)
+			}
+		});
+
+		return client;
 	}
 
 	public static void RegisterTopicReader<TReader>(this ArianeSettings settings, TopicName topicName, SubscriptionName subscriptionName)

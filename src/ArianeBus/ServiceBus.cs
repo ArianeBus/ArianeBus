@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Azure.Core;
+using Azure.Messaging.ServiceBus;
 
 namespace ArianeBus;
 
@@ -24,15 +25,10 @@ internal class ServiceBus : IServiceBus
 		_settings = settings;
 	}
 
-    public Task<IEnumerable<T>> ReceiveAsync<T>(string queueName, int count, int timeoutInMillisecond)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task PublishTopic<T>(string topicName, T request, MessageOptions? options = null, CancellationToken? cancellationToken = null)
+	public async Task PublishTopic<T>(string topicName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
 		where T : class, new()
 	{
-		if (request == null)
+		if (message == null)
 		{
 			_logger.LogWarning("request is null");
 			return;
@@ -46,18 +42,18 @@ internal class ServiceBus : IServiceBus
 
 		var messageRequest = new MessageRequest
 		{
-			Message = request,
-			QueueOrTopicName = topicName,
+			Message = message,
+			QueueOrTopicName = $"{_settings.PrefixName}{topicName}",
 			QueueType = QueueType.Topic
 		};
 
-		await SendInternal(messageRequest, cancellationToken ?? new CancellationTokenSource().Token);
+		await SendInternal(messageRequest, cancellationToken);
 	}
 
-	public async Task EnqueueMessage<T>(string queueName, T request, MessageOptions? options = null, CancellationToken? cancellationToken = null)
+	public async Task EnqueueMessage<T>(string queueName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
 		where T : class, new()
 	{
-		if (request == null)
+		if (message == null)
 		{
 			_logger.LogWarning("request is null");
 			return;
@@ -71,12 +67,12 @@ internal class ServiceBus : IServiceBus
 
 		var messageRequest = new MessageRequest
 		{
-			Message = request,
-			QueueOrTopicName = queueName,
+			Message = message,
+			QueueOrTopicName = $"{_settings.PrefixName}{queueName}",
 			QueueType = QueueType.Queue
 		};
 
-		await SendInternal(messageRequest, cancellationToken ?? new CancellationTokenSource().Token);
+		await SendInternal(messageRequest, cancellationToken);
 	}
 
 	internal async Task SendInternal(MessageRequest messageRequest, CancellationToken cancellationToken)
@@ -89,5 +85,75 @@ internal class ServiceBus : IServiceBus
 
 		await sendStrategy!.TrySendRequest(messageRequest, cancellationToken);
 		_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
+	}
+
+	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default)
+	{
+		var client = _settings.CreateServiceBusClient();
+		var name = $"{_settings.PrefixName}{queueName.Value}";
+		var receiver = client.CreateReceiver(name, new ServiceBusReceiverOptions
+		{
+			PrefetchCount = 0,
+			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+		});
+
+		return await ReceiveInternalAsync<TMessage>(receiver, count, timeoutInMillisecond, cancellationToken);
+	}
+
+	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(TopicName topicName, SubscriptionName subscription, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default)
+	{
+		var client = _settings.CreateServiceBusClient();
+		var name = $"{_settings.PrefixName}{topicName.Value}";
+		var receiver = client.CreateReceiver(name, subscription.Value, new ServiceBusReceiverOptions
+		{
+			PrefetchCount = 0,
+			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+		});
+
+		return await ReceiveInternalAsync<TMessage>(receiver, count, timeoutInMillisecond, cancellationToken);
+	}
+
+	private async Task<IEnumerable<TMessage>> ReceiveInternalAsync<TMessage>(ServiceBusReceiver receiver, int count, int timeoutInMillisecond, CancellationToken cancellationToken)
+	{
+		var result = new List<TMessage>();
+		var receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
+		if (receiveMessageList == null
+			|| !receiveMessageList.Any())
+		{
+			return result;
+		}
+
+		foreach (var receiveMessage in receiveMessageList)
+		{
+			if (receiveMessage.Body == null)
+			{
+				_logger.LogWarning("receive message with body null on queue {queueName}", receiver.EntityPath);
+				continue;
+			}
+
+			try
+			{
+				var message = System.Text.Json.JsonSerializer.Deserialize<TMessage>(receiveMessage.Body.ToString())!;
+				result.Add(message);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "ErrorMessage : {message}", ex.Message);
+			}
+		}
+
+		return result;
+	}
+
+	public async Task CreateQueue(QueueName queueName, CancellationToken cancellationToken = default)
+	{
+		var name = $"{_settings.PrefixName}{queueName.Value}";
+		await _settings.CreateQueueIfNotExists(name, _logger, cancellationToken);
+	}
+
+	public async Task CreateTopic(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default)
+	{
+		var name = $"{_settings.PrefixName}{topicName.Value}";
+		await _settings.CreateTopicAndSubscriptionIfNotExists(name, subscription.Value, _logger, cancellationToken);
 	}
 }

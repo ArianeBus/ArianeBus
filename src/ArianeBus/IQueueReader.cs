@@ -8,7 +8,7 @@ namespace ArianeBus;
 
 internal interface IQueueReader
 {
-	string QueueName { get; set; }
+	string QueueOrTopicName { get; set; }
 	Type MessageType { get; set; }
 	Type ReaderType { get; set; }
 }

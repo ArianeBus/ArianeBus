@@ -50,10 +50,10 @@ public static class StartupExtensions
 				var args = baseType!.GetGenericArguments();
 				var messageType = args[0];
 
-				var topicBaseType = typeof(TopicReader<>);
+				var topicBaseType = typeof(TopicReceiver<>);
 				var topicReaderType = topicBaseType.MakeGenericType(messageType);
 				var tr = (ITopicReader)ActivatorUtilities.CreateInstance(sp, topicReaderType)!;
-				tr.TopicName = topicReader.TopicName;
+				tr.QueueOrTopicName = $"{settings.PrefixName}{topicReader.TopicName}";
 				tr.SubscriptionName = topicReader.SubscriptionName;
 				tr.MessageType = messageType;
 				tr.ReaderType = readerType;
@@ -71,10 +71,10 @@ public static class StartupExtensions
 				var args = baseType!.GetGenericArguments();
 				var messageType = args[0];
 
-				var baseQueueReaderType = typeof(QueueReader<>);
+				var baseQueueReaderType = typeof(QueueReceiver<>);
 				var queueReaderType = baseQueueReaderType.MakeGenericType(messageType);
 				var qr = (IQueueReader)ActivatorUtilities.CreateInstance(sp, queueReaderType)!;
-				qr.QueueName = queueReader.QueueName;
+				qr.QueueOrTopicName = $"{settings.PrefixName}{queueReader.QueueName}";
 				qr.MessageType = messageType;
 				qr.ReaderType = readerType;
 				return (BackgroundService)qr;
