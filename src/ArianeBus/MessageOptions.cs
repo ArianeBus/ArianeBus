@@ -7,7 +7,7 @@ namespace ArianeBus;
 
 public class MessageOptions
 {
-	public string? Label { get; set; }
+	public string? Subject { get; set; }
 	public TimeSpan? TimeToLive { get; set; }
 	public DateTime? ScheduledEnqueueTimeUtc { get; set; }
 }

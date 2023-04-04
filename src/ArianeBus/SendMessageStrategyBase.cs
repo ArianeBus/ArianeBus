@@ -25,6 +25,18 @@ public abstract class SendMessageStrategyBase
 		var data = System.Text.Json.JsonSerializer.Serialize(messageRequest.Message);
 		var bdata = Encoding.UTF8.GetBytes(data);
 		var busMessage = new ServiceBusMessage(bdata);
+		if (messageRequest.MessageOptions is not null)
+		{
+			busMessage.Subject = messageRequest.MessageOptions.Subject;
+			if (messageRequest.MessageOptions.TimeToLive.HasValue)
+			{
+				busMessage.TimeToLive = messageRequest.MessageOptions.TimeToLive.Value;
+			}
+			if (messageRequest.MessageOptions.ScheduledEnqueueTimeUtc.HasValue)
+			{
+				busMessage.ScheduledEnqueueTime = messageRequest.MessageOptions.ScheduledEnqueueTimeUtc.Value;
+			}
+		}
 		return busMessage;
 	}
 }

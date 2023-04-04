@@ -14,4 +14,9 @@ public record QueueName
     }
 
     public string Value { get; init; }
+
+	public override string ToString()
+	{
+        return $"{Value}";
+    }
 }

@@ -38,8 +38,14 @@ internal class ServiceBuSenderFactory
 
 		if (messageRequest.QueueType == QueueType.Queue)
 		{
-			await _settings.CreateQueueIfNotExists(messageRequest.QueueOrTopicName
-				, _logger,
+			await _settings.CreateQueueIfNotExists(messageRequest.QueueOrTopicName,
+				_logger,
+				cancellationToken);
+		}
+		else if (messageRequest.QueueType == QueueType.Topic)
+		{
+			await _settings.CreateTopicIfNotExists(messageRequest.QueueOrTopicName,
+				_logger,
 				cancellationToken);
 		}
 

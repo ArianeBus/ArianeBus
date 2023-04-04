@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Azure.Core;
-using Azure.Messaging.ServiceBus;
+﻿using System.Threading;
 
 namespace ArianeBus;
 
@@ -44,7 +36,8 @@ internal class ServiceBus : IServiceBus
 		{
 			Message = message,
 			QueueOrTopicName = $"{_settings.PrefixName}{topicName}",
-			QueueType = QueueType.Topic
+			QueueType = QueueType.Topic,
+			MessageOptions = options
 		};
 
 		await SendInternal(messageRequest, cancellationToken);
@@ -69,7 +62,8 @@ internal class ServiceBus : IServiceBus
 		{
 			Message = message,
 			QueueOrTopicName = $"{_settings.PrefixName}{queueName}",
-			QueueType = QueueType.Queue
+			QueueType = QueueType.Queue,
+			MessageOptions = options
 		};
 
 		await SendInternal(messageRequest, cancellationToken);
@@ -77,10 +71,18 @@ internal class ServiceBus : IServiceBus
 
 	internal async Task SendInternal(MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
-		var sendStrategy = _senderStrategyList.Single(i => i.StrategyName.Equals(_settings.SendStrategyName, StringComparison.InvariantCultureIgnoreCase));
+		var strategyName = _settings.SendStrategyName;
+
+		if (_settings.MessageSendOptionsList.Any(i => i.Key.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
+		{
+			var queueOrTopicOptions = _settings.MessageSendOptionsList[messageRequest.QueueOrTopicName];
+			_settings.SendStrategyName = queueOrTopicOptions.SendStrategyName;
+		}
+
+		var sendStrategy = _senderStrategyList.Single(i => i.StrategyName.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
 		if (sendStrategy is null)
 		{
-			_logger.LogWarning("try to send message with unknown strategy {name}", _settings.SendStrategyName);
+			_logger.LogWarning("try to send message with unknown strategy {name}", strategyName);
 		}
 
 		await sendStrategy!.TrySendRequest(messageRequest, cancellationToken);
@@ -151,9 +153,123 @@ internal class ServiceBus : IServiceBus
 		await _settings.CreateQueueIfNotExists(name, _logger, cancellationToken);
 	}
 
-	public async Task CreateTopic(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default)
+	public async Task CreateTopic(TopicName topicName, CancellationToken cancellationToken = default)
+	{
+		var name = $"{_settings.PrefixName}{topicName.Value}";
+		await _settings.CreateTopicIfNotExists(name, _logger, cancellationToken);
+	}
+
+	public async Task CreateTopicAndSubscription(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default)
 	{
 		var name = $"{_settings.PrefixName}{topicName.Value}";
 		await _settings.CreateTopicAndSubscriptionIfNotExists(name, subscription.Value, _logger, cancellationToken);
 	}
+
+	public async Task ClearQueue(QueueName queueName, CancellationToken cancellationToken = default)
+	{
+		var client = _settings.CreateServiceBusClient();
+		var name = $"{_settings.PrefixName}{queueName.Value}";
+		var receiver = client.CreateReceiver(name, new ServiceBusReceiverOptions
+		{
+			PrefetchCount = 0,
+			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+		});
+
+		var secureBreak = 0;
+		while (true)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				break;
+			}
+			var receiveMessageList = await receiver.ReceiveMessagesAsync(100, TimeSpan.FromMicroseconds(1), cancellationToken);
+			if (receiveMessageList == null
+				|| !receiveMessageList.Any())
+			{
+				break;
+			}
+
+			if (secureBreak > 10000)
+			{
+				_logger.LogWarning("Exit from infinite loop for queue {queueName}", queueName.Value);
+				break;
+			}
+		}
+	}
+
+	public async Task ClearTopic(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default)
+	{
+		var client = _settings.CreateServiceBusClient();
+		var name = $"{_settings.PrefixName}{topicName.Value}";
+		var receiver = client.CreateReceiver(name, subscriptionName.Value, new ServiceBusReceiverOptions
+		{
+			PrefetchCount = 0,
+			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
+		});
+
+		var secureBreak = 0;
+		while (true)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				break;
+			}
+			var receiveMessageList = await receiver.ReceiveMessagesAsync(100, TimeSpan.FromMicroseconds(1), cancellationToken);
+			if (receiveMessageList == null
+				|| !receiveMessageList.Any())
+			{
+				break;
+			}
+
+			if (secureBreak > 10000)
+			{
+				_logger.LogWarning("Exit from infinite loop for topic {topicName} subscription {subscriptionName}", topicName.Value, subscriptionName.Value);
+				break;
+			}
+		}
+
+	}
+
+	public async Task DeleteQueue(QueueName queueName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.DeleteQueueAsync(queueName.Value, cancellationToken);
+		_logger.LogInformation("Delete queue {queueName} with result {statusCode}", queueName, response.Status);
+	}
+
+	public async Task DeleteTopic(TopicName topicName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.DeleteTopicAsync(topicName.Value, cancellationToken);
+		_logger.LogInformation("Delete topic {topicName} with result {statusCode}", topicName, response.Status);
+	}
+
+	public async Task DeleteSubscription(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.DeleteSubscriptionAsync(topicName.Value, subscriptionName.Value, cancellationToken);
+		_logger.LogInformation("Delete subscription {subscriptionName} for topic {topicName} with result {statusCode}", subscriptionName, topicName, response.Status);
+	}
+
+	public async Task<bool> IsQueueExists(QueueName queueName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.QueueExistsAsync(queueName.Value, cancellationToken);
+		return response.Value;
+	}
+
+	public async Task<bool> IsTopicExists(TopicName topicName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.TopicExistsAsync(topicName.Value, cancellationToken);
+		return response.Value;
+	}
+
+	public async Task<bool> IsSubscriptionExists(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default)
+	{
+		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
+		var response = await managementClient.SubscriptionExistsAsync(topicName.Value, subscriptionName.Value, cancellationToken);
+		return response.Value;
+	}
+
 }

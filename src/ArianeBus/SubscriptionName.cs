@@ -13,4 +13,10 @@ public record SubscriptionName
         this.Value = value;
     }
     public string Value { get; init; }
+
+	public override string ToString()
+	{
+		return $"{Value}";
+	}
+
 }

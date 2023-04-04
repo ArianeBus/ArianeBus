@@ -19,7 +19,7 @@ var services = new ServiceCollection();
 services.AddArianeBus(config =>
 {
 	config.BusConnectionString = cs!;
-	// config.SendStrategyName = $"{SendStrategy.OneByOne}";
+	//config.SendStrategyName = $"{SendStrategy.OneByOne}";
 });
 
 services.AddLogging(config =>

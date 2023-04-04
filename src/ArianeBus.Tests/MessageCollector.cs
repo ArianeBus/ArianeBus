@@ -9,53 +9,54 @@ namespace ArianeBus.Tests
 {
 	public class MessageCollector
 	{
-		private readonly List<Person> m_PersonList = new();
-		private readonly System.Threading.ManualResetEvent m_ManualResetEvent = new(false);
-		private readonly ILogger m_Logger;
-		private int m_MessageCount;
+		private readonly List<Person> _personList = new();
+		private readonly System.Threading.ManualResetEvent _manualResetEvent = new(false);
+		private readonly ILogger _logger;
+		private int _messageCount;
 
 		public MessageCollector(ILogger<MessageCollector> logger)
 		{
-			m_Logger = logger;
-			m_MessageCount = 1;
+			_logger = logger;
+			_messageCount = 1;
 		}
 
 		public int Count
 		{
 			get
 			{
-				return m_PersonList.Count;
+				return _personList.Count;
 			}
 		}
 
 		public void Reset(int? messageCount = 1)
 		{
-			m_PersonList.Clear();
-			m_ManualResetEvent.Reset();
-			m_MessageCount = messageCount.GetValueOrDefault(1);
+			_personList.Clear();
+			_manualResetEvent.Reset();
+			_messageCount = messageCount.GetValueOrDefault(1);
 		}
 
 		public IEnumerable<Person> GetList()
         {
-			return m_PersonList;
+			return _personList;
         }
 
 		public void AddPerson(Person person)
 		{
-			m_PersonList.Add(person);
-			if (m_PersonList.Count >= m_MessageCount)
+			_personList.Add(person);
+			if (_personList.Count >= _messageCount)
             {
-				m_ManualResetEvent.Set();
+				_manualResetEvent.Set();
 			}
 		}
 
 		public async Task WaitForReceiveMessage(int millisecond)
         {
 			var timeout = DateTime.Now.AddSeconds((millisecond / 1000.0) * -1);
-			var success = m_ManualResetEvent.WaitOne(millisecond);
+			var success = _manualResetEvent.WaitOne(millisecond);
 			if (!success)
             {
-				m_Logger.LogWarning("Timeout detected");
+				_logger.LogWarning("Timeout detected");
+				return;
             }
 			var balance = Convert.ToInt32((timeout - DateTime.Now).TotalMilliseconds);
 			await Task.Delay(Math.Max(0, balance));

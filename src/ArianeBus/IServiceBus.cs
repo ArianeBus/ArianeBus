@@ -20,5 +20,24 @@ public interface IServiceBus
 
 	Task CreateQueue(QueueName queueName, CancellationToken cancellationToken = default);
 
-	Task CreateTopic(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default);
+	Task CreateTopic(TopicName topicName, CancellationToken cancellationToken = default);
+
+	Task CreateTopicAndSubscription(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default);
+
+	Task ClearQueue(QueueName queueName, CancellationToken cancellationToken = default);
+
+	Task ClearTopic(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default);
+
+	Task DeleteQueue(QueueName queueName, CancellationToken cancellationToken = default);
+
+	Task DeleteTopic(TopicName topicName, CancellationToken cancellationToken = default);
+
+	Task DeleteSubscription(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default);
+
+	Task<bool> IsQueueExists(QueueName queueName, CancellationToken cancellationToken = default);
+
+	Task<bool> IsTopicExists(TopicName topicName, CancellationToken cancellationToken = default);
+
+	Task<bool> IsSubscriptionExists(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default);
+
 }

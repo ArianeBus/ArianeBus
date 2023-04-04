@@ -17,7 +17,12 @@ public class ArianeSettings
     public string? PrefixName { get; set; }
     public int ReceiveMessageBufferSize { get; set; } = 10;
     public int ReceiveMessageTimeoutInSecond { get; set; } = 1;
+
+    public bool CreateQueueIfNotExists { get; set; } = true;
+    public bool CreateTopicIfNotExists { get; set; } = true;
+    public bool CreateSubscriptionIfNotExists { get; set; } = true;
+
     internal List<TopicReaderRegistration> TopicReaderList { get; set; } = new();
     internal List<QueueReaderRegistration> QueueReaderList { get; set; } = new();
-
+    internal Dictionary<string, QueueOrTopicBehaviorOptions> MessageSendOptionsList { get; set; } = new();
 }

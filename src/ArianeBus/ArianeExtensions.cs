@@ -12,22 +12,7 @@ public static class ArianeExtensions
 		CancellationToken cancellationToken)
 	{
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
-		var topicExists = await managementClient.TopicExistsAsync(topicName, cancellationToken);
-		if (!topicExists)
-		{
-			var topicOptions = new CreateTopicOptions(topicName)
-			{
-				DefaultMessageTimeToLive = TimeSpan.FromDays(settings.DefaultMessageTimeToLiveInDays),
-				AutoDeleteOnIdle = TimeSpan.FromDays(settings.AutoDeleteOnIdleInDays),
-				EnableBatchedOperations = true,
-			};
-			topicOptions.AuthorizationRules.Add(new SharedAccessAuthorizationRule("allClaims"
-				, new[] { AccessRights.Manage, AccessRights.Send, AccessRights.Listen }));
-
-			await managementClient.CreateTopicAsync(topicOptions, cancellationToken);
-
-			logger.LogInformation("Azure topic {topicName} created", topicName);
-		}
+		await settings.CreateTopicIfNotExists(topicName, logger, cancellationToken);
 
 		if (!string.IsNullOrWhiteSpace(subscriptionName))
 		{
@@ -47,6 +32,31 @@ public static class ArianeExtensions
 			}
 		}
 	}
+
+	internal static async Task CreateTopicIfNotExists(this ArianeSettings settings,
+		string topicName,
+		ILogger logger,
+		CancellationToken cancellationToken)
+	{
+		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
+		var topicExists = await managementClient.TopicExistsAsync(topicName, cancellationToken);
+		if (!topicExists)
+		{
+			var topicOptions = new CreateTopicOptions(topicName)
+			{
+				DefaultMessageTimeToLive = TimeSpan.FromDays(settings.DefaultMessageTimeToLiveInDays),
+				AutoDeleteOnIdle = TimeSpan.FromDays(settings.AutoDeleteOnIdleInDays),
+				EnableBatchedOperations = true,
+			};
+			topicOptions.AuthorizationRules.Add(new SharedAccessAuthorizationRule("allClaims"
+				, new[] { AccessRights.Manage, AccessRights.Send, AccessRights.Listen }));
+
+			await managementClient.CreateTopicAsync(topicOptions, cancellationToken);
+
+			logger.LogInformation("Azure topic {topicName} created", topicName);
+		}
+	}
+
 
 	internal static async Task CreateQueueIfNotExists(this ArianeSettings settings,
 		string queueName,
@@ -119,5 +129,25 @@ public static class ArianeExtensions
 			ReaderType = typeof(TReader)
 		};
 		settings.QueueReaderList.Add(queueReader);
+	}
+
+	public static void RegisterQueueOrTopicBehaviorOptions(this ArianeSettings settings, string queueOrTopicName, Action<QueueOrTopicBehaviorOptions> action)
+	{
+		var messageSendingOptions = new QueueOrTopicBehaviorOptions();
+		action(messageSendingOptions);
+		settings.RegisterQueueOrTopicBehaviorOptions(queueOrTopicName, messageSendingOptions);
+	}
+
+	public static void RegisterQueueOrTopicBehaviorOptions(this ArianeSettings settings, string queueOrTopicName, QueueOrTopicBehaviorOptions messageSendingOptions)
+	{
+		if (string.IsNullOrWhiteSpace(queueOrTopicName))
+		{
+			throw new ArgumentNullException(nameof(queueOrTopicName));
+		}
+		if (settings.MessageSendOptionsList.Any(i => i.Key.Equals(queueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
+		{
+			return;
+		}
+		settings.MessageSendOptionsList.Add(queueOrTopicName, messageSendingOptions);
 	}
 }
