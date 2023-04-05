@@ -21,7 +21,7 @@ jobs:
       run: dotnet restore arianebus.sln
 
     - name: Extract config
-      run: 7z x ${{github.workspace}}\src\localconfig.7z -p'${{secrets.localconfig}}' -o${{github.workspace}}\src\ArianeBus.Tests
+      run: 7z x ${{github.workspace}}\src\localconfig.local.zip -p'${{secrets.localconfig}}' -o${{github.workspace}}\src
 
     - name: Build
       run: dotnet build arianebus.sln --configuration Release --no-restore

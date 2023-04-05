@@ -7,7 +7,7 @@ using System.Timers;
 
 namespace ArianeBus;
 
-internal class MessageBuffer
+internal sealed class MessageBuffer : IDisposable
 {
 	private readonly System.Timers.Timer _timeout = new(TimeSpan.FromSeconds(1));
 
@@ -29,6 +29,11 @@ internal class MessageBuffer
 		{
 			await OnTimeout(Batch);
 		}
+		Dispose();
+	}
+
+	public void Dispose()
+	{
 		_timeout.Stop();
 		_timeout.Elapsed -= TimerElapsed;
 	}

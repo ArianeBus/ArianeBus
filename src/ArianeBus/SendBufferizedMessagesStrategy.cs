@@ -96,10 +96,20 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 			&& _messageBuffers.TryGetValue(sendAction.Sender.Identifier, out var buffer)
 			&& buffer.Batch.Count > 0)
 		{
-			sendAction.Sender.SendMessagesAsync(buffer.Batch).Wait(); // <- J'ai pas mieux :(
+			var hasTimeout = sendAction.Sender.SendMessagesAsync(buffer.Batch).Wait(TimeSpan.FromSeconds(15));
+			if (hasTimeout)
+			{
+				_logger.LogWarning("{batchCount} message maybe sent fail for {FullyQualifiedNamespace}", buffer.Batch.Count, sendAction.Sender.FullyQualifiedNamespace);
+			}
+			else
+			{
+				_logger.LogTrace("{batchCount} messages sent in {FullyQualifiedNamespace}", buffer.Batch.Count, sendAction.Sender.FullyQualifiedNamespace);
+			}
 			buffer.IsProcessed = true;
-			_logger.LogTrace("Sent {batchCount} messages in {FullyQualifiedNamespace}", buffer.Batch.Count, sendAction.Sender.FullyQualifiedNamespace);
-			_messageBuffers.TryRemove(sendAction.Sender.Identifier, out var byebye);
+			if (_messageBuffers.TryRemove(sendAction.Sender.Identifier, out var byebye))
+			{
+				byebye.Dispose();
+			}
 			_messageSentCount += buffer.Batch.Count;
 		}
 	}

@@ -14,9 +14,9 @@ public interface IServiceBus
 	Task EnqueueMessage<TMessage>(string queueName, TMessage message, MessageOptions? options = null, CancellationToken cancellationToken = default)
 		where TMessage : class, new();
 
-	Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default);
+	Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int messageCount, int timeoutInMillisecond, CancellationToken cancellationToken = default);
 
-	Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(TopicName topicName, SubscriptionName subscription, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default);
+	Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(TopicName topicName, SubscriptionName subscription, int messageCount, int timeoutInMillisecond, CancellationToken cancellationToken = default);
 
 	Task CreateQueue(QueueName queueName, CancellationToken cancellationToken = default);
 
