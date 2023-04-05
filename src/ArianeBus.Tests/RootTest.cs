@@ -12,8 +12,8 @@ internal class RootTest
 		IHost host = Host.CreateDefaultBuilder()
 					.ConfigureAppConfiguration((ctx, builder) =>
 					{
-						builder.AddJsonFile("appsettings.json", true, false)
-							.AddJsonFile("appsettings.local.json", true, false);
+						builder.AddJsonFile("appSettings.json", true, false)
+							.AddJsonFile("appSettings.local.json", true, false);
 					})
 					.ConfigureServices((ctx, services) =>
 					{
