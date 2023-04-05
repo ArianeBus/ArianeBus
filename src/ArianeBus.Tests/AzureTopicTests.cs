@@ -10,7 +10,7 @@ namespace ArianeBus.Tests;
 public class AzureTopicTests
 {
 	[TestMethod]
-	public async Task Send_And_Receive_Person_Queue()
+	public async Task Send_And_Receive_Person_Topic()
 	{
 		var topic = new TopicName($"topic.{Guid.NewGuid()}");
 		var host = RootTest.CreateHost(config =>
@@ -24,16 +24,13 @@ public class AzureTopicTests
 
 		await host.StartAsync();
 
+		await Task.Delay(5 * 1000);
+
 		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
 		messageCollector.Reset(3);
 
-		var person = new Person();
-		person.FirstName = Guid.NewGuid().ToString();
-		person.LastName = Guid.NewGuid().ToString();
-
+		var person = Person.CreateTestPerson();
 		await bus.PublishTopic(topic.Value, person);
-
-		await Task.Delay(10 * 1000);
 
 		await messageCollector.WaitForReceiveMessage(10 * 1000);
 
