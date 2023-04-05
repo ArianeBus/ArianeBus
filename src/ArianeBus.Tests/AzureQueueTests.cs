@@ -132,9 +132,9 @@ public class AzureQueueTests
 		var queueName = new QueueName($"test.{Guid.NewGuid()}");
 		await bus.EnqueueMessage(queueName.Value, person);
 
-		await Task.Delay(5 * 1000);
+		await Task.Delay(10 * 1000);
 
-		var list = await bus.ReceiveAsync<Person>(queueName, 5, 5 * 1000);
+		var list = await bus.ReceiveAsync<Person>(queueName, 5, 10 * 1000);
 
 		await bus.DeleteQueue(queueName);
 

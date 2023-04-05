@@ -33,9 +33,9 @@ public class AzureTopicTests
 
 		await bus.PublishTopic(topic.Value, person);
 
-		await Task.Delay(5 * 1000);
+		await Task.Delay(10 * 1000);
 
-		await messageCollector.WaitForReceiveMessage(5 * 1000);
+		await messageCollector.WaitForReceiveMessage(10 * 1000);
 
 		messageCollector.Count.Should().Be(3);
 
