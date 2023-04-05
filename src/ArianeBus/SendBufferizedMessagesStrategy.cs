@@ -30,7 +30,7 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
     public override string StrategyName => $"{SendStrategy.Bufferized}";
 	private bool IsProcessing => _semaphore.CurrentCount < 1;
 
-	internal override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
+	public override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
 		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);
 		_messageBuffers.TryGetValue(sender.Identifier, out MessageBuffer? buffer);
@@ -38,13 +38,12 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 		{
 			buffer = new MessageBuffer
 			{
-				Batch = await sender.CreateMessageBatchAsync(cancellationToken)
-			};
-			buffer.OnTimeout = async (batch) =>
-			{
-				await sender.SendMessagesAsync(batch, cancellationToken);
-				_messageBuffers.TryRemove(sender.Identifier, out var byebye);
-				_messageSentCount += buffer.Batch.Count;
+				Batch = await sender.CreateMessageBatchAsync(cancellationToken),
+				OnTimeout = (batch, b) =>
+				{
+					SendInternal(sender, batch);
+					b.IsProcessed = true;
+				}
 			};
 			_messageBuffers.TryAdd(sender.Identifier, buffer);
 		}
@@ -93,25 +92,33 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 		}
 
 		if (sendAction is not null
-			&& _messageBuffers.TryGetValue(sendAction.Sender.Identifier, out var buffer)
-			&& buffer.Batch.Count > 0)
+			&& _messageBuffers.TryGetValue(sendAction.Sender.Identifier, out var buffer))
 		{
-			var hasTimeout = sendAction.Sender.SendMessagesAsync(buffer.Batch).Wait(TimeSpan.FromSeconds(15));
-			if (hasTimeout)
-			{
-				_logger.LogWarning("{batchCount} message maybe sent fail for {FullyQualifiedNamespace}", buffer.Batch.Count, sendAction.Sender.FullyQualifiedNamespace);
-			}
-			else
-			{
-				_logger.LogTrace("{batchCount} messages sent in {FullyQualifiedNamespace}", buffer.Batch.Count, sendAction.Sender.FullyQualifiedNamespace);
-			}
+			SendInternal(sendAction.Sender, buffer.Batch);
 			buffer.IsProcessed = true;
-			if (_messageBuffers.TryRemove(sendAction.Sender.Identifier, out var byebye))
-			{
-				byebye.Dispose();
-			}
-			_messageSentCount += buffer.Batch.Count;
 		}
+	}
+
+	private void SendInternal(ServiceBusSender sender, ServiceBusMessageBatch batch)
+	{
+		if (batch.Count == 0)
+		{
+			return;
+		}
+		var completed = sender.SendMessagesAsync(batch).Wait(TimeSpan.FromSeconds(15));
+		if (!completed)
+		{
+			_logger.LogWarning("{batchCount} message maybe sent fail for {FullyQualifiedNamespace}", batch.Count, sender.FullyQualifiedNamespace);
+		}
+		else
+		{
+			_logger.LogTrace("{batchCount} messages sent in {queueName}", batch.Count, sender.EntityPath);
+		}
+		if (_messageBuffers.TryRemove(sender.Identifier, out var byebye))
+		{
+			byebye.Dispose();
+		}
+		_messageSentCount += batch.Count;
 	}
 
 	private void InternalInvokeAction(SendAction action)

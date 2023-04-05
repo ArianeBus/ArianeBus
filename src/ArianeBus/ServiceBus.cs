@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace ArianeBus;
 
@@ -76,20 +77,20 @@ internal class ServiceBus : IServiceBus
 		if (_settings.MessageSendOptionsList.Any(i => i.Key.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
 		{
 			var queueOrTopicOptions = _settings.MessageSendOptionsList[messageRequest.QueueOrTopicName];
-			_settings.SendStrategyName = queueOrTopicOptions.SendStrategyName;
+			strategyName = queueOrTopicOptions.SendStrategyName;
 		}
 
-		var sendStrategy = _senderStrategyList.Single(i => i.StrategyName.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
+		var sendStrategy = _senderStrategyList.SingleOrDefault(i => i.StrategyName.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
 		if (sendStrategy is null)
 		{
-			_logger.LogWarning("try to send message with unknown strategy {name}", strategyName);
+			throw new ArgumentOutOfRangeException($"try to send message with unknown strategy {strategyName}");
 		}
 
 		await sendStrategy!.TrySendRequest(messageRequest, cancellationToken);
 		_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
 	}
 
-	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int messageCount, int timeoutInMillisecond, CancellationToken cancellationToken = default)
 	{
 		var client = _settings.CreateServiceBusClient();
 		var name = $"{_settings.PrefixName}{queueName.Value}";
@@ -99,10 +100,10 @@ internal class ServiceBus : IServiceBus
 			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
 		});
 
-		return await ReceiveInternalAsync<TMessage>(receiver, count, timeoutInMillisecond, cancellationToken);
+		return await ReceiveInternalAsync<TMessage>(receiver, messageCount, timeoutInMillisecond, cancellationToken);
 	}
 
-	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(TopicName topicName, SubscriptionName subscription, int count, int timeoutInMillisecond, CancellationToken cancellationToken = default)
+	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(TopicName topicName, SubscriptionName subscription, int messageCount, int timeoutInMillisecond, CancellationToken cancellationToken = default)
 	{
 		var client = _settings.CreateServiceBusClient();
 		var name = $"{_settings.PrefixName}{topicName.Value}";
@@ -112,17 +113,30 @@ internal class ServiceBus : IServiceBus
 			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
 		});
 
-		return await ReceiveInternalAsync<TMessage>(receiver, count, timeoutInMillisecond, cancellationToken);
+		return await ReceiveInternalAsync<TMessage>(receiver, messageCount, timeoutInMillisecond, cancellationToken);
 	}
 
 	private async Task<IEnumerable<TMessage>> ReceiveInternalAsync<TMessage>(ServiceBusReceiver receiver, int count, int timeoutInMillisecond, CancellationToken cancellationToken)
 	{
 		var result = new List<TMessage>();
-		var receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
-		if (receiveMessageList == null
-			|| !receiveMessageList.Any())
+		var loop = 0;
+
+		IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList = null;
+		while (true)
 		{
-			return result;
+			receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
+			if ((receiveMessageList == null
+				|| !receiveMessageList.Any()))
+			{
+				if (loop < 3)
+				{
+					// Workaround for startup receiver once with null list
+					loop++;
+					continue;
+				}
+				return result;
+			}
+			break;
 		}
 
 		foreach (var receiveMessage in receiveMessageList)
@@ -232,6 +246,11 @@ internal class ServiceBus : IServiceBus
 
 	public async Task DeleteQueue(QueueName queueName, CancellationToken cancellationToken = default)
 	{
+		if (!await IsQueueExists(queueName, cancellationToken))
+		{
+			_logger.LogWarning("try to delete not existing queue {queueName}", queueName.Value);
+			return;
+		}
 		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
 		var response = await managementClient.DeleteQueueAsync(queueName.Value, cancellationToken);
 		_logger.LogInformation("Delete queue {queueName} with result {statusCode}", queueName, response.Status);
@@ -239,6 +258,11 @@ internal class ServiceBus : IServiceBus
 
 	public async Task DeleteTopic(TopicName topicName, CancellationToken cancellationToken = default)
 	{
+		if (!await IsTopicExists(topicName, cancellationToken))
+		{
+			_logger.LogWarning("try to delete not existing topic {topicName}", topicName.Value);
+			return;
+		}
 		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
 		var response = await managementClient.DeleteTopicAsync(topicName.Value, cancellationToken);
 		_logger.LogInformation("Delete topic {topicName} with result {statusCode}", topicName, response.Status);
@@ -270,6 +294,18 @@ internal class ServiceBus : IServiceBus
 		var managementClient = new ServiceBusAdministrationClient(_settings.BusConnectionString);
 		var response = await managementClient.SubscriptionExistsAsync(topicName.Value, subscriptionName.Value, cancellationToken);
 		return response.Value;
+	}
+
+	public IEnumerable<QueueName> GetRegisteredQueueNameList()
+	{
+		var result = _settings.QueueReaderList.Select(i => new QueueName(i.QueueName)).ToList();
+		return result;
+	}
+
+	public IDictionary<TopicName, SubscriptionName> GetRegisteredTopicAndSubscriptionNameList()
+	{
+		var result = _settings.TopicReaderList.Select(i => new { TopicName = new TopicName(i.TopicName), SubscriptionName = new SubscriptionName(i.SubscriptionName) }).ToList();
+		return result.ToDictionary(i => i.TopicName, j => j.SubscriptionName);
 	}
 
 }

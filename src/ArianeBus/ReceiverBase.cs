@@ -36,11 +36,24 @@ public abstract class ReceiverBase<T> : BackgroundService
 			{
 				break;
 			}
-			var receiveMessageList = await _serviceBusReceiver!.ReceiveMessagesAsync(_settings.ReceiveMessageBufferSize, TimeSpan.FromSeconds(_settings.ReceiveMessageTimeoutInSecond), stoppingToken);
-			if (receiveMessageList == null
-				|| !receiveMessageList.Any())
+			if (_serviceBusReceiver!.IsClosed)
 			{
-				continue;
+				break;
+			}
+			IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList = null;
+			try
+			{
+				receiveMessageList = await _serviceBusReceiver!.ReceiveMessagesAsync(_settings.ReceiveMessageBufferSize, TimeSpan.FromSeconds(_settings.ReceiveMessageTimeoutInSecond), stoppingToken);
+				if (receiveMessageList == null
+					|| !receiveMessageList.Any())
+				{
+					continue;
+				}
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, ex.Message);
+				break;
 			}
 
 			foreach (var receiveMessage in receiveMessageList)

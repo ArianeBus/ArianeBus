@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace ArianeBus;
 
-internal class MessageRequest 
+public class MessageRequest 
 {
     public string QueueOrTopicName { get; set; } = null!;
     public object Message { get; set; } = default!;
-    public string AssemblyQualifiedNameMessageType => Message.GetType().AssemblyQualifiedName!;
     internal QueueType QueueType { get; set; }
     public MessageOptions? MessageOptions { get; set; }
 }

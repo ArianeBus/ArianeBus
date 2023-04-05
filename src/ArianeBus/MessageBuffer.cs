@@ -9,7 +9,7 @@ namespace ArianeBus;
 
 internal sealed class MessageBuffer : IDisposable
 {
-	private readonly System.Timers.Timer _timeout = new(TimeSpan.FromSeconds(1));
+	private readonly System.Timers.Timer _timeout = new(TimeSpan.FromSeconds(2));
 
 	public MessageBuffer()
     {
@@ -19,15 +19,15 @@ internal sealed class MessageBuffer : IDisposable
 
 	public ServiceBusMessageBatch Batch { get; set; } = default!;
 
-	public Func<ServiceBusMessageBatch, Task> OnTimeout = default!;
+	public Action<ServiceBusMessageBatch, MessageBuffer> OnTimeout = default!;
 	public bool IsProcessed { get; set; } = false;
 
-    private async void TimerElapsed(object? source, ElapsedEventArgs e)
+    private void TimerElapsed(object? source, ElapsedEventArgs e)
 	{
 		if (OnTimeout is not null
 			&& !IsProcessed)
 		{
-			await OnTimeout(Batch);
+			OnTimeout(Batch, this);
 		}
 		Dispose();
 	}

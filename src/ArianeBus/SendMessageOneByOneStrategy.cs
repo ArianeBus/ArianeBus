@@ -19,7 +19,7 @@ internal class SendMessageOneByOneStrategy  : SendMessageStrategyBase
 
 	public override string StrategyName => $"{SendStrategy.OneByOne}";
 
-	internal override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
+	public override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
 		_messageAddedCount++;
 		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);

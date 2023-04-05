@@ -9,47 +9,66 @@ namespace ArianeBus.Tests;
 [TestClass]
 public class AzureTopicTests
 {
-	private static IHost? _host;
-
-	[ClassInitialize()]
-	public static void Initialize(TestContext testContext)
-	{
-		_host = RootTest.CreateHost(config =>
-		{
-			config.RegisterTopicReader<PersonReader>(new TopicName("MyTopic"), new SubscriptionName("sub1"));
-			config.RegisterTopicReader<PersonReader>(new TopicName("MyTopic"), new SubscriptionName("sub2"));
-			config.RegisterTopicReader<PersonReader>(new TopicName("MyTopic"), new SubscriptionName("sub3"));
-			config.RegisterTopicReader<PersonReader>(new TopicName("topic.clear"), new SubscriptionName("subclear"));
-		});
-	}
-
 	[TestMethod]
 	public async Task Send_And_Receive_Person_Queue()
 	{
-		var bus = _host!.Services.GetRequiredService<IServiceBus>();
+		var topic = new TopicName($"topic.{Guid.NewGuid()}");
+		var host = RootTest.CreateHost(config =>
+		{
+			config.RegisterTopicReader<PersonReader>(topic, new SubscriptionName("sub1"));
+			config.RegisterTopicReader<PersonReader>(topic, new SubscriptionName("sub2"));
+			config.RegisterTopicReader<PersonReader>(topic, new SubscriptionName("sub3"));
+		});
 
-		var messageCollector = _host.Services.GetRequiredService<MessageCollector>();
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
+
+		await host.StartAsync();
+
+		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
 		messageCollector.Reset(3);
 
 		var person = new Person();
 		person.FirstName = Guid.NewGuid().ToString();
 		person.LastName = Guid.NewGuid().ToString();
 
-		await bus.PublishTopic("MyTopic", person);
+		await bus.PublishTopic(topic.Value, person);
 
-		await _host.StartAsync();
+		await Task.Delay(5 * 1000);
 
-		await messageCollector.WaitForReceiveMessage(30 * 1000);
+		await messageCollector.WaitForReceiveMessage(5 * 1000);
 
 		messageCollector.Count.Should().Be(3);
 
-		await _host.StopAsync();
+		await host.StopAsync();
+
+		await bus.DeleteTopic(topic);
 	}
+
+	[TestMethod]
+	public void Register_Same_Topic_And_Subscription()
+	{
+		var host = RootTest.CreateHost(config =>
+		{
+			config.RegisterTopicReader<PersonReader>(new TopicName("MyTopic"), new SubscriptionName("sub1"));
+			config.RegisterTopicReader<PersonReader>(new TopicName("MyTopic"), new SubscriptionName("sub1"));
+		});
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
+		var topicList = bus.GetRegisteredTopicAndSubscriptionNameList();
+
+		topicList.Count.Should().Be(1);
+	}
+
 
 	[TestMethod]
 	public async Task Clear_Topic()
 	{
-		var bus = _host!.Services.GetRequiredService<IServiceBus>();
+		var host = RootTest.CreateHost(config =>
+		{
+			config.RegisterTopicReader<PersonReader>(new TopicName("topic.clear"), new SubscriptionName("subclear"));
+		});
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
 
 		await bus.CreateTopicAndSubscription(new TopicName("topic.clear"), new SubscriptionName("subclear"));
 
@@ -66,7 +85,9 @@ public class AzureTopicTests
 	[TestMethod]
 	public async Task Create_And_Delete_Topic_And_Subscription()
 	{
-		var bus = _host!.Services.GetRequiredService<IServiceBus>();
+		var host = RootTest.CreateHost();
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
 
 		var topicName = new TopicName($"{Guid.NewGuid()}");
 		var subscriptionName1 = new SubscriptionName($"{Guid.NewGuid()}");

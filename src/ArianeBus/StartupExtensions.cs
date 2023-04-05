@@ -5,6 +5,7 @@ namespace ArianeBus;
 
 public static class StartupExtensions
 {
+
 	public static void AddArianeBus(this IServiceCollection services, Action<ArianeSettings> config)
 	{
 		var settings = new ArianeSettings();
@@ -16,7 +17,7 @@ public static class StartupExtensions
 	{
 		if (settings is null)
 		{
-			throw new ArgumentNullException(paramName: "settings");
+			throw new ArgumentNullException(nameof(settings));
 		}
 		services.AddSingleton(settings);
 
