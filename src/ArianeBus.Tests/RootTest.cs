@@ -7,7 +7,7 @@ namespace ArianeBus.Tests;
 
 internal class RootTest
 {
-	public static IHost CreateHost(Action<ArianeSettings>? arianeConfig = null)
+	public static IHost CreateHost(Action<ArianeSettings>? arianeConfig = null, Action<IServiceCollection>? otherServices = null)
 	{
 		IHost host = Host.CreateDefaultBuilder()
 					.ConfigureAppConfiguration((ctx, builder) =>
@@ -34,6 +34,8 @@ internal class RootTest
 						});
 
 						services.AddSingleton<MessageCollector>();
+
+						otherServices?.Invoke(services);
 					})
 					.Build();
 

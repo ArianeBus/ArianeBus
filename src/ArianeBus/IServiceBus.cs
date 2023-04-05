@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Primitives;
+
 namespace ArianeBus;
 
 public interface IServiceBus
@@ -39,5 +41,9 @@ public interface IServiceBus
 	Task<bool> IsTopicExists(TopicName topicName, CancellationToken cancellationToken = default);
 
 	Task<bool> IsSubscriptionExists(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default);
+
+	IEnumerable<QueueName> GetRegisteredQueueNameList();
+
+	IDictionary<TopicName, SubscriptionName> GetRegisteredTopicAndSubscriptionNameList();
 
 }

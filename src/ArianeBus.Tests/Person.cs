@@ -7,7 +7,8 @@ namespace ArianeBus.Tests
 {
 	public class Person 
 	{
-		public string FirstName { get; set; } = null!;
+        public int Id { get; set; }
+        public string FirstName { get; set; } = null!;
 		public string LastName { get; set; } = null!;
 		public bool IsProcessed { get; set; } = false;
         public string FromQueue { get; set; } = null!;
