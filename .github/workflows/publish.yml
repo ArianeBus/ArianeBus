@@ -7,7 +7,7 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -18,19 +18,19 @@ jobs:
         dotnet-version: 7.x
 
     - name: Restore dependencies
-      run: dotnet restore arianebus.sln
+      run: dotnet restore ArianeBus.sln
 
     - name: Extract config
-      run: 7z x ${{github.workspace}}\src\localconfig.local.zip -p'${{secrets.localconfig}}' -o${{github.workspace}}\src
+      run: 7z x ${{github.workspace}}/src/appSettings.local.zip -p'${{secrets.localconfig}}' -o${{github.workspace}}/src
 
     - name: Build
-      run: dotnet build arianebus.sln --configuration Release --no-restore
+      run: dotnet build ArianeBus.sln --configuration Release --no-restore
 
     - name: Test
-      run: dotnet test arianebus.sln -c Release --no-build --verbosity normal
+      run: dotnet test ArianeBus.sln -c Release --no-build --verbosity normal
 
     - name: Pack ArianeBus
-      run: dotnet pack --no-build --configuration Release ${{github.workspace}}\src\ArianeBus\ArianeBus.csproj --output .
+      run: dotnet pack --no-build --configuration Release ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
 
     - name: Push Nuget
       run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.nuget}} --skip-duplicate
