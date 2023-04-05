@@ -121,7 +121,7 @@ internal class ServiceBus : IServiceBus
 		var result = new List<TMessage>();
 		var loop = 0;
 
-		IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList = null;
+		IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList;
 		while (true)
 		{
 			receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
@@ -130,7 +130,8 @@ internal class ServiceBus : IServiceBus
 			{
 				if (loop < 3)
 				{
-					// Workaround for startup receiver once with null list
+					// Workaround for startup receiver once with null list (I don't know why, maybe a bug)
+					await Task.Delay(1 * 1000, cancellationToken);
 					loop++;
 					continue;
 				}
