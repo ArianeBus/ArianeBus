@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 /src/ConsoleReader/appSettings.local.json
 /src/ConsoleWriter/appSettings.local.json
+/src/appSettings.local.json
