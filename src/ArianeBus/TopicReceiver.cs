@@ -32,6 +32,8 @@ internal class TopicReceiver<T> : ReceiverBase<T>, ITopicReader
 		_reader!.QueueOrTopicName = QueueOrTopicName;
 		_reader.FromSubscriptionName = SubscriptionName;
 
+		_logger.LogInformation("TopicReceiver<{type}> started for topic {topicName} with subscription {subscription}", nameof(T), QueueOrTopicName, SubscriptionName);	
+
 		await base.StartAsync(cancellationToken);
 	}
 }
