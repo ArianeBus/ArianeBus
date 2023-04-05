@@ -4,15 +4,16 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>0.0.9.0</Version>
+		<Version>1.0.1.0</Version>
 		<PackageId>ArianeBus</PackageId>
 		<PackageProjectUrl>https://github.com/arianebus/arianebus</PackageProjectUrl>
 		<IncludeSymbols>true</IncludeSymbols>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
-		<PackageTags>Azure, Bus, MediatR</PackageTags>
-		<Description>Send and Receive messages massively with Azure Bus using MediatoR</Description>
+		<PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
+		<Description>Send and Receive messages massively with Azure Bus</Description>
 		<PackageReleaseNotes>
+			1.0.1.0 Tests ok
 			0.0.9.0 Creation
 		</PackageReleaseNotes>
 	</PropertyGroup>
