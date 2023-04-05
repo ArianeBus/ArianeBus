@@ -1,6 +1,6 @@
 # ArianeBus (0.0.9.0)
 
-Send and Receive messages massively with Azure Bus
+Send and Receive messages massively with Azure Bus 
 
 ## Where can I get it ?
 
