@@ -13,6 +13,13 @@ public static class StartupExtensions
 
 		services.AddArianeBus(settings);
 	}
+
+	/// <summary>
+	/// Add ArianeBus to the service collection with the specified settings object and the default implementation of the <see cref="SendMessageStrategyBase"/> class.
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="settings"></param>
+	/// <exception cref="ArgumentNullException"></exception>
 	public static void AddArianeBus(this IServiceCollection services, ArianeSettings settings)
 	{
 		if (settings is null)
@@ -22,8 +29,16 @@ public static class StartupExtensions
 		services.AddSingleton(settings);
 
 		services.AddSingleton<ServiceBuSenderFactory>();
-		services.AddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
-		services.AddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
+		if (settings.UseMockForUnitTests)
+		{
+			settings.SendStrategyName = "mock";
+			services.AddSingleton<SendMessageStrategyBase, SendMessageMockStrategy>();
+		}
+		else
+		{
+			services.AddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
+			services.AddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
+		}
 		services.AddTransient<IServiceBus, ServiceBus>();
 
 		services.AddSingleton(sp =>

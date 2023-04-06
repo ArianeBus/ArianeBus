@@ -1,4 +1,6 @@
-﻿using ArianeBus.Tests;
+﻿using System.Reflection.Emit;
+
+using ArianeBus.Tests;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -276,4 +278,23 @@ public class AzureQueueTests
 		await bus.DeleteQueue(new QueueName("failqueue"));
 	}
 
+	[TestMethod] 
+	public async Task Send_With_Mock_Sender()
+	{
+		var host = RootTest.CreateHost(config =>
+		{
+			config.UseMockForUnitTests = true;
+			config.RegisterQueueReader<PersonReader>(new QueueName("test.mock"));
+		});
+
+		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
+		messageCollector.Reset(1);
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
+		var person = Person.CreateTestPerson();
+
+		await bus.EnqueueMessage("test.mock", person);
+		
+		messageCollector.Count.Should().Be(1);
+	}
 }

@@ -127,4 +127,25 @@ public class AzureTopicTests
 		exists.Should().BeFalse();
 	}
 
+	[TestMethod]
+	public async Task Send_With_Mock_Sender()
+	{
+		var host = RootTest.CreateHost(config =>
+		{
+			config.UseMockForUnitTests = true;
+			config.RegisterTopicReader<PersonReader>(new TopicName("topic.mock"), new SubscriptionName("sub1"));
+			config.RegisterTopicReader<PersonReader>(new TopicName("topic.mock"), new SubscriptionName("sub2"));
+		});
+
+		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
+		messageCollector.Reset(1);
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
+		var person = Person.CreateTestPerson();
+
+		await bus.PublishTopic("topic.mock", person);
+
+		messageCollector.Count.Should().Be(2);
+	}
+
 }

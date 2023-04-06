@@ -22,6 +22,8 @@ public class ArianeSettings
     public bool CreateTopicIfNotExists { get; set; } = true;
     public bool CreateSubscriptionIfNotExists { get; set; } = true;
 
+    public bool UseMockForUnitTests { get; set; } = false;
+
     internal List<TopicReaderRegistration> TopicReaderList { get; set; } = new();
     internal List<QueueReaderRegistration> QueueReaderList { get; set; } = new();
     internal Dictionary<string, QueueOrTopicBehaviorOptions> MessageSendOptionsList { get; set; } = new();
