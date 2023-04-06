@@ -1,4 +1,4 @@
-# ArianeBus (0.0.9.0)
+# ArianeBus
 
 Send and Receive messages massively with Azure Bus 
 
