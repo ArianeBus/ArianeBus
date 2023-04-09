@@ -99,38 +99,6 @@ public static class ArianeExtensions
 		return client;
 	}
 
-	public static void RegisterTopicReader<TReader>(this ArianeSettings settings, TopicName topicName, SubscriptionName subscriptionName)
-		where TReader : IMessageReader
-	{
-		if (settings.TopicReaderList.Any(i => i.TopicName.Equals(topicName.Value, StringComparison.InvariantCultureIgnoreCase)
-												&& i.SubscriptionName.Equals(subscriptionName.Value, StringComparison.InvariantCultureIgnoreCase)))
-		{
-			return;
-		}
-		var topicReader = new TopicReaderRegistration
-		{
-			TopicName = topicName.Value,
-			SubscriptionName = subscriptionName.Value,
-			ReaderType = typeof(TReader)
-		};
-		settings.TopicReaderList.Add(topicReader);
-	}
-
-	public static void RegisterQueueReader<TReader>(this ArianeSettings settings, QueueName queueName)
-		where TReader : IMessageReader
-	{
-		if (settings.QueueReaderList.Any(i => i.QueueName.Equals(queueName.Value, StringComparison.InvariantCultureIgnoreCase)))
-		{
-			return;
-		}
-		var queueReader = new QueueReaderRegistration
-		{
-			QueueName = queueName.Value,
-			ReaderType = typeof(TReader)
-		};
-		settings.QueueReaderList.Add(queueReader);
-	}
-
 	public static void RegisterQueueOrTopicBehaviorOptions(this ArianeSettings settings, string queueOrTopicName, Action<QueueOrTopicBehaviorOptions> action)
 	{
 		var messageSendingOptions = new QueueOrTopicBehaviorOptions();

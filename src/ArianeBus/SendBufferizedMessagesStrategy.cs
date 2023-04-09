@@ -105,14 +105,21 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 		{
 			return;
 		}
-		var completed = sender.SendMessagesAsync(batch).Wait(TimeSpan.FromSeconds(15));
-		if (!completed)
+		try
 		{
-			_logger.LogWarning("{batchCount} message maybe sent fail for {FullyQualifiedNamespace}", batch.Count, sender.FullyQualifiedNamespace);
+			var completed = sender.SendMessagesAsync(batch).Wait(TimeSpan.FromSeconds(15));
+			if (!completed)
+			{
+				_logger.LogWarning("{batchCount} message maybe sent fail for {FullyQualifiedNamespace}", batch.Count, sender.FullyQualifiedNamespace);
+			}
+			else
+			{
+				_logger.LogTrace("{batchCount} messages sent in {queueName}", batch.Count, sender.EntityPath);
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			_logger.LogTrace("{batchCount} messages sent in {queueName}", batch.Count, sender.EntityPath);
+			_logger.LogError(ex, "{batchCount} messages sent fail for {FullyQualifiedNamespace}", batch.Count, sender.FullyQualifiedNamespace);
 		}
 		if (_messageBuffers.TryRemove(sender.Identifier, out var byebye))
 		{
