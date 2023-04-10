@@ -19,7 +19,7 @@ internal class ServiceBus : IServiceBus
 	}
 
 	public async Task PublishTopic<T>(string topicName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
-		where T : class, new()
+		where T : class
 	{
 		if (message == null)
 		{
@@ -45,7 +45,7 @@ internal class ServiceBus : IServiceBus
 	}
 
 	public async Task EnqueueMessage<T>(string queueName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
-		where T : class, new()
+		where T : class
 	{
 		if (message == null)
 		{
@@ -83,7 +83,7 @@ internal class ServiceBus : IServiceBus
 		var sendStrategy = _senderStrategyList.SingleOrDefault(i => i.StrategyName.Equals(strategyName, StringComparison.InvariantCultureIgnoreCase));
 		if (sendStrategy is null)
 		{
-			throw new ArgumentOutOfRangeException($"try to send message with unknown strategy {strategyName}");
+			throw new ArgumentOutOfRangeException($"fail to send message with unknown strategy {strategyName}");
 		}
 
 		await sendStrategy!.TrySendRequest(messageRequest, cancellationToken);
