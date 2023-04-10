@@ -67,8 +67,7 @@ public class SendMessageMockStrategy : SendMessageStrategyBase
 		{
 			var methodInfo = reader.GetType().GetMethod("ProcessMessageAsync")!;
 			var parameters = new object?[] { messageRequest.Message, cancellationToken };
-			var task = methodInfo.Invoke(reader, parameters) as Task;
-			if (task == null)
+			if (methodInfo.Invoke(reader, parameters) is not Task task)
 			{
 				throw new InvalidOperationException("ProcessMessageAsync must return a Task");
 			}
