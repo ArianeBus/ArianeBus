@@ -34,7 +34,7 @@ public class SendMessageMockStrategy : SendMessageStrategyBase
 			if (registeredQueue != null)
 			{
 				readerType = registeredQueue.ReaderType;
-				await SendInternal(messageRequest, readerType, cancellationToken).ConfigureAwait(false);
+				await SendInternal(messageRequest, readerType, cancellationToken);
 			}
 			else
 			{
@@ -50,7 +50,7 @@ public class SendMessageMockStrategy : SendMessageStrategyBase
 				foreach (var item in registeredTopicList)
 				{
 					readerType = item.ReaderType;
-					await SendInternal(messageRequest, readerType, cancellationToken).ConfigureAwait(false);
+					await SendInternal(messageRequest, readerType, cancellationToken);
 				}
 			}
 			else
@@ -67,7 +67,11 @@ public class SendMessageMockStrategy : SendMessageStrategyBase
 		{
 			var methodInfo = reader.GetType().GetMethod("ProcessMessageAsync")!;
 			var parameters = new object?[] { messageRequest.Message, cancellationToken };
-			var task = (Task)methodInfo.Invoke(reader, parameters);
+			var task = methodInfo.Invoke(reader, parameters) as Task;
+			if (task == null)
+			{
+				throw new InvalidOperationException("ProcessMessageAsync must return a Task");
+			}
 			await task!.ConfigureAwait(false);
 		}
 		else

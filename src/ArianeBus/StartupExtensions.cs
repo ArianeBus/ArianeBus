@@ -101,7 +101,7 @@ public static class StartupExtensions
 
 		services.AddSingleton(sp =>
 		{
-			var serviceBusClient = new ServiceBusClient(settings.BusConnectionString, new ServiceBusClientOptions()
+			var serviceBusClient = new ServiceBusClient(arianeSettings.BusConnectionString, new ServiceBusClientOptions()
 			{
 				TransportType = ServiceBusTransportType.AmqpTcp,
 				RetryOptions = new ServiceBusRetryOptions()
@@ -117,6 +117,9 @@ public static class StartupExtensions
 		foreach (var topicReader in settings.TopicReaderList)
 		{
 			arianeSettings.RegisterTopicReader(topicReader);
+		}
+		foreach (var topicReader in arianeSettings.TopicReaderList)
+		{
 			services.AddSingleton<IHostedService>(sp =>
 			{
 				var readerType = topicReader.ReaderType;
@@ -128,7 +131,7 @@ public static class StartupExtensions
 				var topicBaseType = typeof(TopicReceiver<>);
 				var topicReaderType = topicBaseType.MakeGenericType(messageType);
 				var tr = (ITopicReader)ActivatorUtilities.CreateInstance(sp, topicReaderType)!;
-				tr.QueueOrTopicName = $"{settings.PrefixName}{topicReader.TopicName}";
+				tr.QueueOrTopicName = $"{arianeSettings.PrefixName}{topicReader.TopicName}";
 				tr.SubscriptionName = topicReader.SubscriptionName;
 				tr.MessageType = messageType;
 				tr.ReaderType = readerType;
@@ -139,6 +142,9 @@ public static class StartupExtensions
 		foreach (var queueReader in settings.QueueReaderList)
 		{
 			arianeSettings.RegisterQueueReader(queueReader);
+		}
+		foreach (var queueReader in arianeSettings.QueueReaderList)
+		{
 			services.AddSingleton<IHostedService>(sp =>
 			{
 				var readerType = queueReader.ReaderType;
@@ -150,7 +156,7 @@ public static class StartupExtensions
 				var baseQueueReaderType = typeof(QueueReceiver<>);
 				var queueReaderType = baseQueueReaderType.MakeGenericType(messageType);
 				var qr = (IQueueReader)ActivatorUtilities.CreateInstance(sp, queueReaderType)!;
-				qr.QueueOrTopicName = $"{settings.PrefixName}{queueReader.QueueName}";
+				qr.QueueOrTopicName = $"{arianeSettings.PrefixName}{queueReader.QueueName}";
 				qr.MessageType = messageType;
 				qr.ReaderType = readerType;
 				return (BackgroundService)qr;

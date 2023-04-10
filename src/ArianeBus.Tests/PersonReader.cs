@@ -26,7 +26,7 @@ internal class PersonReader : ArianeBus.MessageReaderBase<Person>
 		message.IsProcessed = true;
 
 		_messageCollector.AddPerson(message);
-		_logger.LogInformation("Thread:{threadName} Person:{firstName} message count {count}", System.Threading.Thread.CurrentThread.ManagedThreadId, message.FirstName, _messageCollector.Count);
+		_logger.LogInformation("Thread:{threadName} Person:{firstName} message count {count}", Environment.CurrentManagedThreadId, message.FirstName, _messageCollector.Count);
 		return Task.CompletedTask;
 	}
 }

@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.3.0</Version>
+		<Version>1.0.4.1</Version>
 		<PackageId>ArianeBus</PackageId>
 		<PackageProjectUrl>https://github.com/arianebus/arianebus</PackageProjectUrl>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -13,6 +13,7 @@
 		<PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
 		<Description>Send and Receive messages massively with Azure Bus</Description>
 		<PackageReleaseNotes>
+			1.0.4.1 Fix bug on configuration
 			1.0.3.0 Improve configuration
 			1.0.2.0 Mock for Unit Tests
 			1.0.1.0 Tests ok
