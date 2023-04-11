@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace ArianeBus;
@@ -32,7 +33,7 @@ public static class StartupExtensions
 		if (registeredSettings is null)
 		{
 			arianeSettings = new ArianeSettings();
-			services.AddSingleton(arianeSettings);
+			services.TryAddSingleton(arianeSettings);
 		}
 		else
 		{
@@ -86,20 +87,20 @@ public static class StartupExtensions
 			arianeSettings.UseMockForUnitTests = settings.UseMockForUnitTests;
 		}
 
-		services.AddSingleton<ServiceBuSenderFactory>();
+		services.TryAddSingleton<ServiceBuSenderFactory>();
 		if (settings.UseMockForUnitTests)
 		{
 			arianeSettings.SendStrategyName = "mock";
-			services.AddSingleton<SendMessageStrategyBase, SendMessageMockStrategy>();
+			services.TryAddSingleton<SendMessageStrategyBase, SendMessageMockStrategy>();
 		}
 		else
 		{
-			services.AddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
-			services.AddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
+			services.TryAddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
+			services.TryAddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
 		}
-		services.AddTransient<IServiceBus, ServiceBus>();
+		services.TryAddTransient<IServiceBus, ServiceBus>();
 
-		services.AddSingleton(sp =>
+		services.TryAddSingleton(sp =>
 		{
 			var serviceBusClient = new ServiceBusClient(arianeSettings.BusConnectionString, new ServiceBusClientOptions()
 			{
@@ -120,7 +121,7 @@ public static class StartupExtensions
 		}
 		foreach (var topicReader in arianeSettings.TopicReaderList)
 		{
-			services.AddSingleton<IHostedService>(sp =>
+			services.TryAddSingleton<IHostedService>(sp =>
 			{
 				var readerType = topicReader.ReaderType;
 				var baseType = readerType.BaseType; // MessageReaderBase<>
@@ -145,7 +146,7 @@ public static class StartupExtensions
 		}
 		foreach (var queueReader in arianeSettings.QueueReaderList)
 		{
-			services.AddSingleton<IHostedService>(sp =>
+			services.TryAddSingleton<IHostedService>(sp =>
 			{
 				var readerType = queueReader.ReaderType;
 				var baseType = readerType.BaseType; // MessageReaderBase<>
