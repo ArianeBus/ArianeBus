@@ -14,8 +14,7 @@ namespace ArianeBus.Tests
         public string FromQueue { get; set; } = null!;
 		public string FromSubscription { get; set; } = null!;
         public string FromMessageReader { get; set; } = null!;
-
-		public static Person CreateTestPerson()
+        public static Person CreateTestPerson()
 		{
 			var person = new Person();
 			person.FirstName = Guid.NewGuid().ToString();

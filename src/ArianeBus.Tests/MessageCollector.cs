@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace ArianeBus.Tests
 {
 	public class MessageCollector
 	{
-		private readonly List<Person> _personList = new();
+		private readonly ConcurrentDictionary<Guid, Person> _personList = new();
 		private readonly System.Threading.ManualResetEvent _manualResetEvent = new(false);
 		private readonly ILogger _logger;
 		private int _messageCount;
@@ -37,12 +38,15 @@ namespace ArianeBus.Tests
 
 		public IEnumerable<Person> GetList()
         {
-			return _personList;
+			return _personList.Select(i => i.Value);
         }
 
 		public void AddPerson(Person person)
 		{
-			_personList.Add(person);
+			if (!_personList.TryAdd(Guid.NewGuid(), person))
+			{
+				throw new Exception("try to add person failed");
+			}
 			if (_personList.Count >= _messageCount)
             {
 				_manualResetEvent.Set();
