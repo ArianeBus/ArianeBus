@@ -121,7 +121,7 @@ public static class StartupExtensions
 		}
 		foreach (var topicReader in arianeSettings.TopicReaderList)
 		{
-			services.TryAddSingleton<IHostedService>(sp =>
+			services.AddSingleton<IHostedService>(sp =>
 			{
 				var readerType = topicReader.ReaderType;
 				var baseType = readerType.BaseType; // MessageReaderBase<>

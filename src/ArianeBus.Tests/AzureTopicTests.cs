@@ -24,8 +24,6 @@ public class AzureTopicTests
 
 		await host.StartAsync();
 
-		await Task.Delay(5 * 1000);
-
 		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
 		messageCollector.Reset(3);
 
