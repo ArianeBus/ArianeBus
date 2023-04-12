@@ -73,6 +73,27 @@ public class ArianeSettings
 		return RegisterQueueReader(queueReader);
 	}
 
+	public void RegisterQueueOrTopicBehaviorOptions(string queueOrTopicName, Action<QueueOrTopicBehaviorOptions> action)
+	{
+		var messageSendingOptions = new QueueOrTopicBehaviorOptions();
+		action(messageSendingOptions);
+		RegisterQueueOrTopicBehaviorOptions(queueOrTopicName, messageSendingOptions);
+	}
+
+	public void RegisterQueueOrTopicBehaviorOptions(string queueOrTopicName, QueueOrTopicBehaviorOptions messageSendingOptions)
+	{
+		if (string.IsNullOrWhiteSpace(queueOrTopicName))
+		{
+			throw new ArgumentNullException(nameof(queueOrTopicName));
+		}
+		if (MessageSendOptionsList.Any(i => i.Key.Equals(queueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
+		{
+			return;
+		}
+		MessageSendOptionsList.Add(queueOrTopicName, messageSendingOptions);
+	}
+
+
 	internal ArianeSettings RegisterQueueReader(QueueReaderRegistration queueReaderRegistration)
 	{
 		if (QueueReaderList.Any(i => i.QueueName.Equals(queueReaderRegistration.QueueName, StringComparison.InvariantCultureIgnoreCase)))

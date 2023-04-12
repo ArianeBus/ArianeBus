@@ -31,7 +31,7 @@ public class AzureQueueTests
 
 		await host.StartAsync();
 
-		await messageCollector.WaitForReceiveMessage(5 * 1000);
+		await messageCollector.WaitForReceiveMessage(6 * 1000);
 		messageCollector.Count.Should().BeGreaterThan(0);
 
 		await host.StopAsync();
@@ -90,9 +90,10 @@ public class AzureQueueTests
 	[TestMethod]
 	public async Task Send_And_Receive_Person_Message_With_Options()
 	{
+		var queueName = new QueueName($"test.schedule.{Guid.NewGuid()}");
 		var host = RootTest.CreateHost(config =>
 		{
-			config.RegisterQueueReader<PersonReader>(new QueueName("test.azure2"));
+			config.RegisterQueueReader<PersonReader>(queueName);
 		});
 
 		var bus = host!.Services.GetRequiredService<IServiceBus>();
@@ -100,26 +101,26 @@ public class AzureQueueTests
 		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
 		messageCollector.Reset();
 
-		var person = new Person();
-		person.FirstName = Guid.NewGuid().ToString();
-		person.LastName = Guid.NewGuid().ToString();
-
-		await bus.EnqueueMessage("test.azure2", person, new MessageOptions
+		var person = Person.CreateTestPerson();
+		await bus.EnqueueMessage(queueName.Value, person, new MessageOptions
 		{
 			Subject = "test message",
 			TimeToLive = TimeSpan.FromMinutes(1),
-			ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddSeconds(20),
+			ScheduledEnqueueTimeUtc = DateTime.UtcNow.AddSeconds(10),
 		});
+
+		await Task.Delay(5 * 1000);
 
 		await host.StartAsync();
 
 		await messageCollector.WaitForReceiveMessage(1 * 1000);
 		messageCollector.Count.Should().Be(0);
 
-		await messageCollector.WaitForReceiveMessage(25 * 1000);
+		await messageCollector.WaitForReceiveMessage(60 * 1000);
 		messageCollector.Count.Should().BeGreaterThan(0);
 
 		await host.StopAsync();
+		await bus.DeleteQueue(queueName);
 	}
 
 

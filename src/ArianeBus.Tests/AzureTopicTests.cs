@@ -146,4 +146,19 @@ public class AzureTopicTests
 		messageCollector.Count.Should().Be(2);
 	}
 
+	[TestMethod]
+	public async Task Publish_Null_Message()
+	{
+		var host = RootTest.CreateHost();
+
+		var bus = host.Services.GetRequiredService<IServiceBus>();
+
+		object message = null;
+
+		await bus.PublishTopic("topic.clear", message);
+
+		string topicName = null;
+		await bus.PublishTopic(topicName, new object());
+	}
+
 }

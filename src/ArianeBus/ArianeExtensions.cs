@@ -98,24 +98,4 @@ public static class ArianeExtensions
 
 		return client;
 	}
-
-	public static void RegisterQueueOrTopicBehaviorOptions(this ArianeSettings settings, string queueOrTopicName, Action<QueueOrTopicBehaviorOptions> action)
-	{
-		var messageSendingOptions = new QueueOrTopicBehaviorOptions();
-		action(messageSendingOptions);
-		settings.RegisterQueueOrTopicBehaviorOptions(queueOrTopicName, messageSendingOptions);
-	}
-
-	public static void RegisterQueueOrTopicBehaviorOptions(this ArianeSettings settings, string queueOrTopicName, QueueOrTopicBehaviorOptions messageSendingOptions)
-	{
-		if (string.IsNullOrWhiteSpace(queueOrTopicName))
-		{
-			throw new ArgumentNullException(nameof(queueOrTopicName));
-		}
-		if (settings.MessageSendOptionsList.Any(i => i.Key.Equals(queueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
-		{
-			return;
-		}
-		settings.MessageSendOptionsList.Add(queueOrTopicName, messageSendingOptions);
-	}
 }
