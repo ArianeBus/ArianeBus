@@ -12,17 +12,15 @@ namespace ArianeBus;
 internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 {
 	private readonly ConcurrentDictionary<string, MessageBuffer> _messageBuffers = new();
-	private readonly ServiceBuSenderFactory _serviceBuSenderFactory;
 	private readonly ArianeSettings _settings;
 	private readonly ILogger _logger;
 	private readonly ConcurrentQueue<SendAction> _queue = new();
 	private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-	public SendBufferizedMessagesStrategy(ServiceBuSenderFactory serviceBuSenderFactory,
+	public SendBufferizedMessagesStrategy(
 		ArianeSettings settings,
 		ILogger<SendBufferizedMessagesStrategy> logger)
     {
-		_serviceBuSenderFactory = serviceBuSenderFactory;
 		_settings = settings;
 		_logger = logger;
 	}
@@ -30,9 +28,8 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
     public override string StrategyName => $"{SendStrategy.Bufferized}";
 	private bool IsProcessing => _semaphore.CurrentCount < 1;
 
-	public override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
+	public override async Task TrySendRequest(ServiceBusSender sender, MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
-		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);
 		_messageBuffers.TryGetValue(sender.Identifier, out MessageBuffer? buffer);
 		if (buffer is null)
 		{

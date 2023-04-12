@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArianeBus;
 
-public class SendMessageMockStrategy : SendMessageStrategyBase
+internal class SendMessageMockStrategy : SendMessageStrategyBase
 {
 	private readonly ArianeSettings _settings;
 	private readonly IServiceProvider _serviceProvider;
@@ -25,7 +25,7 @@ public class SendMessageMockStrategy : SendMessageStrategyBase
 
 	public override string StrategyName => "mock";
 
-	public override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
+	public override async Task TrySendRequest(ServiceBusSender sender, MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
 		Type? readerType = null;
 		if (messageRequest.QueueType == QueueType.Queue)
