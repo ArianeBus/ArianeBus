@@ -49,6 +49,7 @@ public abstract class ReceiverBase<T> : BackgroundService
 				{
 					continue;
 				}
+				_logger.LogTrace("receive {count} messages on queue or topic {name}", receiveMessageList.Count, QueueOrTopicName);
 			}
 			catch (Exception ex)
 			{

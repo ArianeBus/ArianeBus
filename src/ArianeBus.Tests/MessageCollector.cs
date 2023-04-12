@@ -11,11 +11,11 @@ namespace ArianeBus.Tests
 	public class MessageCollector
 	{
 		private readonly ConcurrentDictionary<Guid, Person> _personList = new();
-		private readonly System.Threading.ManualResetEvent _manualResetEvent = new(false);
 		private readonly ILogger _logger;
 		private int _messageCount;
+		public bool _exitRequested { get; set; } = false;
 
-		public MessageCollector(ILogger<MessageCollector> logger)
+        public MessageCollector(ILogger<MessageCollector> logger)
 		{
 			_logger = logger;
 			_messageCount = 1;
@@ -32,7 +32,7 @@ namespace ArianeBus.Tests
 		public void Reset(int? messageCount = 1)
 		{
 			_personList.Clear();
-			_manualResetEvent.Reset();
+			_exitRequested = false;
 			_messageCount = messageCount.GetValueOrDefault(1);
 		}
 
@@ -49,21 +49,21 @@ namespace ArianeBus.Tests
 			}
 			if (_personList.Count >= _messageCount)
             {
-				_manualResetEvent.Set();
+				_exitRequested = true;
 			}
 		}
 
 		public async Task WaitForReceiveMessage(int millisecond)
         {
-			var timeout = DateTime.Now.AddSeconds((millisecond / 1000.0) * -1);
-			var success = _manualResetEvent.WaitOne(millisecond);
-			if (!success)
-            {
-				_logger.LogWarning("Timeout detected");
-				return;
-            }
-			var balance = Convert.ToInt32((timeout - DateTime.Now).TotalMilliseconds);
-			await Task.Delay(Math.Max(0, balance));
+			var timeout = DateTime.Now.AddMilliseconds(millisecond);
+			while (DateTime.Now < timeout)
+			{
+				await Task.Yield();
+				if (_exitRequested)
+				{
+					break;
+				}
+			}
 		}
 	}
 }

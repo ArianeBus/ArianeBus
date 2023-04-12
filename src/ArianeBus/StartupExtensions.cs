@@ -95,8 +95,15 @@ public static class StartupExtensions
 		}
 		else
 		{
-			services.TryAddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
-			services.TryAddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
+			var registeredStrategies = services.Where(i => i.ServiceType == typeof(SendMessageStrategyBase));
+			if (!registeredStrategies.Any(i => i.ImplementationType == typeof(SendBufferizedMessagesStrategy)))
+			{
+				services.AddSingleton<SendMessageStrategyBase, SendBufferizedMessagesStrategy>();
+			}
+			if (!registeredStrategies.Any(i => i.ImplementationType == typeof(SendMessageOneByOneStrategy)))
+			{
+				services.AddSingleton<SendMessageStrategyBase, SendMessageOneByOneStrategy>();
+			}
 		}
 		services.TryAddTransient<IServiceBus, ServiceBus>();
 
@@ -162,6 +169,11 @@ public static class StartupExtensions
 				qr.ReaderType = readerType;
 				return (BackgroundService)qr;
 			});
+		}
+
+		foreach (var messageOption in settings.MessageSendOptionsList)
+		{
+			arianeSettings.RegisterQueueOrTopicBehaviorOptions(messageOption.Key, messageOption.Value);
 		}
 	}
 }
