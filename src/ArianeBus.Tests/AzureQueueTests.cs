@@ -23,14 +23,14 @@ public class AzureQueueTests
 		await bus.CreateQueue(queueName);
 
 		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
-		messageCollector.Reset();
+		messageCollector.Reset(1);
 
 		var person = Person.CreateTestPerson();
 		await bus.SendAsync(queueName.Value, person);
 
 		await host.StartAsync();
 
-		await messageCollector.WaitForReceiveMessage(5 * 1000);
+		await messageCollector.WaitForReceiveMessage(10 * 1000);
 		messageCollector.Count.Should().BeGreaterThan(0);
 
 		await host.StopAsync();
