@@ -7,7 +7,7 @@ public abstract class SendMessageStrategyBase
 	protected int _messageSentCount = 0;
 
 	public abstract string StrategyName { get; }
-    public abstract Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken);
+    public abstract Task TrySendRequest(ServiceBusSender sender, MessageRequest messageRequest, CancellationToken cancellationToken);
 
 	public virtual (int messageAddedCount, int messageProcessedCount, int messageSentCount) GetStats()
 	{

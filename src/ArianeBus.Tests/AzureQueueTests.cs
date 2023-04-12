@@ -9,6 +9,34 @@ namespace ArianeBus.Tests;
 [TestClass]
 public class AzureQueueTests
 {
+	[TestMethod]
+	public async Task Send_And_Receive_Person_Message_With_Obsolete()
+	{
+		var queueName = new QueueName($"test.{Guid.NewGuid()}");
+		var host = RootTest.CreateHost(config =>
+		{
+			config.RegisterQueueReader<PersonReader>(queueName);
+		});
+
+		var bus = host!.Services.GetRequiredService<IServiceBus>();
+
+		await bus.CreateQueue(queueName);
+
+		var messageCollector = host.Services.GetRequiredService<MessageCollector>();
+		messageCollector.Reset();
+
+		var person = Person.CreateTestPerson();
+		await bus.SendAsync(queueName.Value, person);
+
+		await host.StartAsync();
+
+		await messageCollector.WaitForReceiveMessage(5 * 1000);
+		messageCollector.Count.Should().BeGreaterThan(0);
+
+		await host.StopAsync();
+
+		await bus.DeleteQueue(queueName);
+	}
 
 	[TestMethod]
 	public async Task Send_And_Receive_Person_Message()

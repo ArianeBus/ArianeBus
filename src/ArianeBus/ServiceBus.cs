@@ -8,14 +8,17 @@ internal class ServiceBus : IServiceBus
 	private readonly IEnumerable<SendMessageStrategyBase> _senderStrategyList;
 	private readonly ILogger _logger;
 	private readonly ArianeSettings _settings;
+	private readonly ServiceBuSenderFactory _serviceBuSenderFactory;
 
 	public ServiceBus(IEnumerable<SendMessageStrategyBase> senderStrategyList,
 		ILogger<ServiceBus> logger,
-		ArianeSettings settings)
+		ArianeSettings settings,
+		ServiceBuSenderFactory serviceBuSenderFactory)
     {
 		_senderStrategyList = senderStrategyList;
 		_logger = logger;
 		_settings = settings;
+		_serviceBuSenderFactory = serviceBuSenderFactory;
 	}
 
 	public async Task PublishTopic<T>(string topicName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
@@ -70,6 +73,32 @@ internal class ServiceBus : IServiceBus
 		await SendInternal(messageRequest, cancellationToken);
 	}
 
+	public async Task SendAsync<TMessage>(string topicOrQueueName, TMessage message, MessageOptions? options = null, CancellationToken cancellationToken = default)
+		where TMessage : class
+	{
+		if (message == null)
+		{
+			_logger.LogWarning("request is null");
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(topicOrQueueName))
+		{
+			_logger.LogWarning("queue name is null");
+			return;
+		}
+
+		var messageRequest = new MessageRequest
+		{
+			Message = message,
+			QueueOrTopicName = $"{_settings.PrefixName}{topicOrQueueName}",
+			QueueType = QueueType.Unknown,
+			MessageOptions = options
+		};
+
+		await SendInternal(messageRequest, cancellationToken);
+	}
+
 	internal async Task SendInternal(MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
 		var strategyName = _settings.SendStrategyName;
@@ -86,7 +115,8 @@ internal class ServiceBus : IServiceBus
 			throw new ArgumentOutOfRangeException($"fail to send message with unknown strategy {strategyName}");
 		}
 
-		await sendStrategy!.TrySendRequest(messageRequest, cancellationToken);
+		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);
+		await sendStrategy!.TrySendRequest(sender, messageRequest, cancellationToken);
 		_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
 	}
 

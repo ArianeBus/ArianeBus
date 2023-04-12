@@ -10,19 +10,11 @@ namespace ArianeBus;
 
 internal class SendMessageOneByOneStrategy  : SendMessageStrategyBase
 {
-	private readonly ServiceBuSenderFactory _serviceBuSenderFactory;
-
-	public SendMessageOneByOneStrategy(ServiceBuSenderFactory serviceBuSenderFactory)
-    {
-		_serviceBuSenderFactory = serviceBuSenderFactory;
-	}
-
 	public override string StrategyName => $"{SendStrategy.OneByOne}";
 
-	public override async Task TrySendRequest(MessageRequest messageRequest, CancellationToken cancellationToken)
+	public override async Task TrySendRequest(ServiceBusSender sender, MessageRequest messageRequest, CancellationToken cancellationToken)
 	{
 		_messageAddedCount++;
-		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);
 		var messageBus = CreateServiceBusMessage(messageRequest);
 		_messageProcessedCount++;
 		await sender.SendMessageAsync(messageBus, cancellationToken);
