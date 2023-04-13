@@ -40,7 +40,7 @@ public static class ArianeExtensions
 	{
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
 		var topicExists = await managementClient.TopicExistsAsync(topicName, cancellationToken);
-		if (!topicExists)
+		if (!topicExists.Value)
 		{
 			var topicOptions = new CreateTopicOptions(topicName)
 			{
@@ -64,8 +64,8 @@ public static class ArianeExtensions
 		CancellationToken cancellationToken)
 	{
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
-		var queueExists = await managementClient.QueueExistsAsync(queueName, cancellationToken);
-		if (!queueExists)
+		var queueExists = await managementClient.QueueExistsAsync(queueName.ToLower(), cancellationToken);
+		if (!queueExists.Value)
 		{
 			var options = new CreateQueueOptions(queueName)
 			{

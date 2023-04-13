@@ -74,7 +74,8 @@ public abstract class ReceiverBase<T> : BackgroundService
 
 		try
 		{
-			var message = System.Text.Json.JsonSerializer.Deserialize<T>(receiveMessage.Body.ToString())!;
+			var bodyContent= receiveMessage.Body.ToString();
+			var message = System.Text.Json.JsonSerializer.Deserialize<T>(bodyContent, JsonSerializer.Options)!;
 			await _reader!.ProcessMessageAsync(message, cancellationToken);
 		}
 		catch (Exception ex)

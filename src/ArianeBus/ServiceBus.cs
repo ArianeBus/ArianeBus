@@ -180,7 +180,8 @@ internal class ServiceBus : IServiceBus
 
 			try
 			{
-				var message = System.Text.Json.JsonSerializer.Deserialize<TMessage>(receiveMessage.Body.ToString())!;
+				var bodyContent = receiveMessage.Body.ToString();
+				var message = System.Text.Json.JsonSerializer.Deserialize<TMessage>(bodyContent, JsonSerializer.Options)!;
 				result.Add(message);
 			}
 			catch (Exception ex)
