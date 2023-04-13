@@ -153,7 +153,7 @@ public static class StartupExtensions
 		}
 		foreach (var queueReader in arianeSettings.QueueReaderList)
 		{
-			services.TryAddSingleton<IHostedService>(sp =>
+			services.AddSingleton<IHostedService>(sp =>
 			{
 				var readerType = queueReader.ReaderType;
 				var baseType = readerType.BaseType; // MessageReaderBase<>

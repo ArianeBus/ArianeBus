@@ -48,7 +48,7 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 		Add(new SendAction
 		{
 			Sender = sender,
-			Action = () =>
+			Action = async () =>
 			{
 				var busMessage = CreateServiceBusMessage(messageRequest);
 				_messageBuffers.TryGetValue(sender.Identifier, out var buffer);
@@ -57,7 +57,25 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 					_logger.LogWarning("sent message fail");
 					return;
 				}
-				buffer!.Batch.TryAddMessage(busMessage);
+				var retryCount = 0;
+				while (true)
+				{
+					try
+					{
+						buffer!.Batch.TryAddMessage(busMessage);
+						break;
+					}
+					catch (Exception ex)
+					{
+						if (retryCount > 2)
+						{
+							_logger.LogError(ex, ex.Message);
+							break;
+						}
+						retryCount++;
+						await Task.Delay(1 * 1000); // Waiting for peace...
+					}
+				}
 			}
 		});
 

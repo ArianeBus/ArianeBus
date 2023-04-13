@@ -16,7 +16,7 @@ public abstract class SendMessageStrategyBase
 
 	internal virtual ServiceBusMessage CreateServiceBusMessage(MessageRequest messageRequest)
 	{
-		var data = System.Text.Json.JsonSerializer.Serialize(messageRequest.Message);
+		var data = System.Text.Json.JsonSerializer.Serialize(messageRequest.Message, JsonSerializer.Options);
 		var bdata = Encoding.UTF8.GetBytes(data);
 		var busMessage = new ServiceBusMessage(bdata);
 		if (messageRequest.MessageOptions is not null)
