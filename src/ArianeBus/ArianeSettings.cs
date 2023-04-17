@@ -24,8 +24,7 @@ public class ArianeSettings
 
     public bool UseMockForUnitTests { get; set; } = false;
 
-    internal List<TopicReaderRegistration> TopicReaderList { get; set; } = new();
-    internal List<QueueReaderRegistration> QueueReaderList { get; set; } = new();
+    internal List<ReaderRegistration> ReaderList { get; set; } = new();
     internal Dictionary<string, QueueOrTopicBehaviorOptions> MessageSendOptionsList { get; set; } = new();
 
 	public ArianeSettings RegisterTopicReader<TReader>(TopicName topicName, SubscriptionName subscriptionName)
@@ -36,24 +35,25 @@ public class ArianeSettings
 
 	public ArianeSettings RegisterTopicReader(TopicName topicName, SubscriptionName subscriptionName, Type topicReaderType)
 	{
-		var topicReader = new TopicReaderRegistration
+		var topicReader = new ReaderRegistration
 		{
-			TopicName = topicName.Value,
+			QueueOrTopicName = topicName.Value,
 			SubscriptionName = subscriptionName.Value,
-			ReaderType = topicReaderType
+			ReaderType = topicReaderType,
+			QueueType = QueueType.Topic
 		};
 
 		return RegisterTopicReader(topicReader);
 	}
 
-	internal ArianeSettings RegisterTopicReader(TopicReaderRegistration topicReaderRegistration)
+	internal ArianeSettings RegisterTopicReader(ReaderRegistration topicReaderRegistration)
 	{
-		if (TopicReaderList.Any(i => i.TopicName.Equals(topicReaderRegistration.TopicName, StringComparison.InvariantCultureIgnoreCase)
+		if (ReaderList.Any(i => i.QueueOrTopicName.Equals(topicReaderRegistration.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)
 												&& i.SubscriptionName.Equals(topicReaderRegistration.SubscriptionName, StringComparison.InvariantCultureIgnoreCase)))
 		{
 			return this;
 		}
-		TopicReaderList.Add(topicReaderRegistration);
+		ReaderList.Add(topicReaderRegistration);
 		return this;
 	}
 
@@ -65,10 +65,11 @@ public class ArianeSettings
 
 	public ArianeSettings RegisterQueueReader(QueueName queueName, Type queueReaderType)
 	{
-		var queueReader = new QueueReaderRegistration
+		var queueReader = new ReaderRegistration
 		{
-			QueueName = queueName.Value,
-			ReaderType = queueReaderType
+			QueueOrTopicName = queueName.Value,
+			ReaderType = queueReaderType,
+			QueueType = QueueType.Queue
 		};
 		return RegisterQueueReader(queueReader);
 	}
@@ -94,13 +95,13 @@ public class ArianeSettings
 	}
 
 
-	internal ArianeSettings RegisterQueueReader(QueueReaderRegistration queueReaderRegistration)
+	internal ArianeSettings RegisterQueueReader(ReaderRegistration queueReaderRegistration)
 	{
-		if (QueueReaderList.Any(i => i.QueueName.Equals(queueReaderRegistration.QueueName, StringComparison.InvariantCultureIgnoreCase)))
+		if (ReaderList.Any(i => i.QueueOrTopicName.Equals(queueReaderRegistration.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)))
 		{
 			return this;
 		}
-		QueueReaderList.Add(queueReaderRegistration);
+		ReaderList.Add(queueReaderRegistration);
 		return this;
 	}
 }

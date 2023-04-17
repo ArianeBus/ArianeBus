@@ -122,52 +122,57 @@ public static class StartupExtensions
 			return serviceBusClient;
 		});
 
-		foreach (var topicReader in settings.TopicReaderList)
+		foreach (var reader in settings.ReaderList)
 		{
-			arianeSettings.RegisterTopicReader(topicReader);
-		}
-		foreach (var topicReader in arianeSettings.TopicReaderList)
+			if (reader.QueueType == QueueType.Queue)
+			{
+                arianeSettings.RegisterQueueReader(reader);
+            }
+            else if (reader.QueueType == QueueType.Topic)
+			{
+                arianeSettings.RegisterTopicReader(reader);
+            }
+        }
+
+		foreach (var reader in arianeSettings.ReaderList)
 		{
+			if (reader.IsRegistered)
+			{
+				continue;
+			}
+			reader.IsRegistered = true;
 			services.AddSingleton<IHostedService>(sp =>
 			{
-				var readerType = topicReader.ReaderType;
+				var readerType = reader.ReaderType;
 				var baseType = readerType.BaseType; // MessageReaderBase<>
 
 				var args = baseType!.GetGenericArguments();
 				var messageType = args[0];
 
-				var topicBaseType = typeof(TopicReceiver<>);
-				var topicReaderType = topicBaseType.MakeGenericType(messageType);
-				var tr = (ITopicReader)ActivatorUtilities.CreateInstance(sp, topicReaderType)!;
-				tr.QueueOrTopicName = $"{arianeSettings.PrefixName}{topicReader.TopicName}";
-				tr.SubscriptionName = topicReader.SubscriptionName;
-				tr.MessageType = messageType;
-				tr.ReaderType = readerType;
-				return (BackgroundService)tr;
-			});
-		}
+				if (reader.QueueType == QueueType.Topic)
+				{
+					var topicBaseType = typeof(TopicReceiver<>);
+					var topicReaderType = topicBaseType.MakeGenericType(messageType);
 
-		foreach (var queueReader in settings.QueueReaderList)
-		{
-			arianeSettings.RegisterQueueReader(queueReader);
-		}
-		foreach (var queueReader in arianeSettings.QueueReaderList)
-		{
-			services.AddSingleton<IHostedService>(sp =>
-			{
-				var readerType = queueReader.ReaderType;
-				var baseType = readerType.BaseType; // MessageReaderBase<>
+					var tr = (ITopicReader)ActivatorUtilities.GetServiceOrCreateInstance(sp, topicReaderType)!;
+					tr.QueueOrTopicName = $"{arianeSettings.PrefixName}{reader.QueueOrTopicName}";
+					tr.SubscriptionName = reader.SubscriptionName;
+					tr.MessageType = messageType;
+					tr.ReaderType = readerType;
+					return (BackgroundService)tr;
+				}
+				else if (reader.QueueType == QueueType.Queue)
+				{
+					var baseQueueReaderType = typeof(QueueReceiver<>);
+					var queueReaderType = baseQueueReaderType.MakeGenericType(messageType);
 
-				var args = baseType!.GetGenericArguments();
-				var messageType = args[0];
-
-				var baseQueueReaderType = typeof(QueueReceiver<>);
-				var queueReaderType = baseQueueReaderType.MakeGenericType(messageType);
-				var qr = (IQueueReader)ActivatorUtilities.CreateInstance(sp, queueReaderType)!;
-				qr.QueueOrTopicName = $"{arianeSettings.PrefixName}{queueReader.QueueName}";
-				qr.MessageType = messageType;
-				qr.ReaderType = readerType;
-				return (BackgroundService)qr;
+					var qr = (IQueueReader)ActivatorUtilities.GetServiceOrCreateInstance(sp, queueReaderType)!;
+					qr.QueueOrTopicName = $"{arianeSettings.PrefixName}{reader.QueueOrTopicName}";
+					qr.MessageType = messageType;
+					qr.ReaderType = readerType;
+					return (BackgroundService)qr;
+				}
+				return default!;
 			});
 		}
 

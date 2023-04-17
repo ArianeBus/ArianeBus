@@ -330,13 +330,13 @@ internal class ServiceBus : IServiceBus
 
 	public IEnumerable<QueueName> GetRegisteredQueueNameList()
 	{
-		var result = _settings.QueueReaderList.Select(i => new QueueName(i.QueueName)).ToList();
+		var result = _settings.ReaderList.Select(i => new QueueName(i.QueueOrTopicName)).ToList();
 		return result;
 	}
 
 	public IDictionary<TopicName, SubscriptionName> GetRegisteredTopicAndSubscriptionNameList()
 	{
-		var result = _settings.TopicReaderList.Select(i => new { TopicName = new TopicName(i.TopicName), SubscriptionName = new SubscriptionName(i.SubscriptionName) }).ToList();
+		var result = _settings.ReaderList.Select(i => new { TopicName = new TopicName(i.QueueOrTopicName), SubscriptionName = new SubscriptionName(i.SubscriptionName) }).ToList();
 		return result.ToDictionary(i => i.TopicName, j => j.SubscriptionName);
 	}
 
