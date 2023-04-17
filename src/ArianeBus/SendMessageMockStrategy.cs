@@ -30,7 +30,7 @@ internal class SendMessageMockStrategy : SendMessageStrategyBase
 		Type? readerType = null;
 		if (messageRequest.QueueType == QueueType.Queue)
 		{
-			var registeredQueue = _settings.QueueReaderList.FirstOrDefault(i => i.QueueName.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase));
+			var registeredQueue = _settings.ReaderList.FirstOrDefault(i => i.QueueOrTopicName.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase));
 			if (registeredQueue != null)
 			{
 				readerType = registeredQueue.ReaderType;
@@ -43,7 +43,7 @@ internal class SendMessageMockStrategy : SendMessageStrategyBase
 		}
 		else if (messageRequest.QueueType == QueueType.Topic)
 		{
-			var registeredTopicList = _settings.TopicReaderList.Where(i => i.TopicName.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)).ToList();
+			var registeredTopicList = _settings.ReaderList.Where(i => i.QueueOrTopicName.Equals(messageRequest.QueueOrTopicName, StringComparison.InvariantCultureIgnoreCase)).ToList();
 			if (registeredTopicList != null
 				&& registeredTopicList.Any())
 			{

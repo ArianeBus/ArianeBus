@@ -21,6 +21,7 @@ internal class RootTest
 
 						var settings = new ArianeSettings();
 						settings.BusConnectionString = cs!;
+						settings.SendStrategyName = $"{ArianeBus.SendStrategy.Bufferized}";
 						arianeConfig?.Invoke(settings);
 
 						services.AddArianeBus(settings);

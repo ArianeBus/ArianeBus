@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.8.2</Version>
+		<Version>1.0.9.3</Version>
 		<PackageId>ArianeBus</PackageId>
 		<PackageProjectUrl>https://github.com/arianebus/arianebus</PackageProjectUrl>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -13,8 +13,9 @@
 		<PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
 		<Description>Send and Receive messages massively with Azure Bus</Description>
 		<PackageReleaseNotes>
+			1.0.9.3 Fix : Multiple background service registered in same queue
 			1.0.8.2 Send message one by one instead of batch by default
-			        Set JSon serialization options for Send/Receive
+			Set JSon serialization options for Send/Receive
 			1.0.7.2 Add SendAsync method for compatibility with Ariane.AzureBus
 			1.0.6.2 Improve message sender behavior by queue or topic
 			1.0.5.2 Fix multiple possible registration of SenderStrategy
@@ -25,6 +26,10 @@
 			0.0.9.0 Creation
 		</PackageReleaseNotes>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="QueueReaderRegistration.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.13.1" />

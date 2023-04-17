@@ -28,7 +28,13 @@ public abstract class ReceiverBase<T> : BackgroundService
 
 	public string QueueOrTopicName { get; set; } = null!;
 
-	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+		_logger.LogInformation("Start queue or topic {name} in background service", QueueOrTopicName);
+        return base.StartAsync(cancellationToken);
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
