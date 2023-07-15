@@ -91,7 +91,7 @@ public static class StartupExtensions
 		if (settings.UseMockForUnitTests)
 		{
 			arianeSettings.SendStrategyName = "mock";
-			services.TryAddSingleton<SendMessageStrategyBase, SendMessageMockStrategy>();
+			services.AddSingleton<SendMessageStrategyBase, SendMessageMockStrategy>();
 		}
 		else
 		{
