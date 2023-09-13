@@ -44,7 +44,14 @@ internal class ServiceBus : IServiceBus
 			MessageOptions = options
 		};
 
-		await SendInternal(messageRequest, cancellationToken);
+		try
+		{
+			await SendInternal(messageRequest, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, ex.Message);
+		}
 	}
 
 	public async Task EnqueueMessage<T>(string queueName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
@@ -116,8 +123,15 @@ internal class ServiceBus : IServiceBus
 		}
 
 		var sender = await _serviceBuSenderFactory.GetSender(messageRequest, cancellationToken);
-		await sendStrategy!.TrySendRequest(sender, messageRequest, cancellationToken);
-		_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
+		try
+		{
+			await sendStrategy!.TrySendRequest(sender, messageRequest, cancellationToken);
+			_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, ex.Message);
+		}
 	}
 
 	public async Task<IEnumerable<TMessage>> ReceiveAsync<TMessage>(QueueName queueName, int messageCount, int timeoutInMillisecond, CancellationToken cancellationToken = default)
@@ -151,12 +165,20 @@ internal class ServiceBus : IServiceBus
 		var result = new List<TMessage>();
 		var loop = 0;
 
-		IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList;
+		IReadOnlyList<ServiceBusReceivedMessage>? receiveMessageList = null;
 		while (true)
 		{
-			receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
-			if ((receiveMessageList == null
-				|| !receiveMessageList.Any()))
+			try
+			{
+				receiveMessageList = await receiver.ReceiveMessagesAsync(count, TimeSpan.FromMicroseconds(timeoutInMillisecond), cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, ex.Message);
+			}
+
+			if (receiveMessageList is null
+				|| !receiveMessageList.Any())
 			{
 				if (loop < 3)
 				{
@@ -170,23 +192,26 @@ internal class ServiceBus : IServiceBus
 			break;
 		}
 
-		foreach (var receiveMessage in receiveMessageList)
+		if (receiveMessageList is not null)
 		{
-			if (receiveMessage.Body == null)
+			foreach (var receiveMessage in receiveMessageList)
 			{
-				_logger.LogWarning("receive message with body null on queue {queueName}", receiver.EntityPath);
-				continue;
-			}
+				if (receiveMessage.Body == null)
+				{
+					_logger.LogWarning("receive message with body null on queue {queueName}", receiver.EntityPath);
+					continue;
+				}
 
-			try
-			{
-				var bodyContent = receiveMessage.Body.ToString();
-				var message = System.Text.Json.JsonSerializer.Deserialize<TMessage>(bodyContent, JsonSerializer.Options)!;
-				result.Add(message);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "ErrorMessage : {message}", ex.Message);
+				try
+				{
+					var bodyContent = receiveMessage.Body.ToString();
+					var message = System.Text.Json.JsonSerializer.Deserialize<TMessage>(bodyContent, JsonSerializer.Options)!;
+					result.Add(message);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "ErrorMessage : {message}", ex.Message);
+				}
 			}
 		}
 
