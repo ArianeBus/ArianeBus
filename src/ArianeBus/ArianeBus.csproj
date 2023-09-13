@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.10.4</Version>
+		<Version>1.0.11.5</Version>
 		<PackageId>ArianeBus</PackageId>
 		<PackageProjectUrl>https://github.com/arianebus/arianebus</PackageProjectUrl>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -13,6 +13,7 @@
 		<PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
 		<Description>Send and Receive messages massively with Azure Bus</Description>
 		<PackageReleaseNotes>
+			1.0.11.5 Fix : add Try/Catch for send and receive
 			1.0.10.4 Fix : TryToAddSingleton for MockSenderStrategy failed
 			1.0.9.3 Fix : Multiple background service registered in same queue
 			1.0.8.2 Send message one by one instead of batch by default
@@ -29,7 +30,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="QueueReaderRegistration.cs" />
+		<Compile Remove="QueueReaderRegistration.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
