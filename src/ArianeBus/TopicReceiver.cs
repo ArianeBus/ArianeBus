@@ -28,7 +28,20 @@ internal class TopicReceiver<T> : ReceiverBase<T>, ITopicReader
 			ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete
 		});
 
-		_reader = ActivatorUtilities.CreateInstance(_serviceProvider, ReaderType) as MessageReaderBase<T>;
+		try
+		{
+			_reader = ActivatorUtilities.CreateInstance(_serviceProvider, ReaderType) as MessageReaderBase<T>;
+			if (_reader is null)
+			{
+				_logger.LogCritical("Unable to create instance of {type}", typeof(T).Name);
+				throw new InvalidOperationException($"Unable to create instance of {typeof(T).Name}");
+			}
+		}
+		catch (Exception ex)
+		{
+			_logger.LogCritical(ex, "Unable to create instance of {type}", typeof(T).Name);
+			throw new InvalidOperationException($"Unable to create instance of {typeof(T).Name}", ex);
+		}
 		_reader!.QueueOrTopicName = QueueOrTopicName;
 		_reader.FromSubscriptionName = SubscriptionName;
 

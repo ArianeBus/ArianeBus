@@ -86,6 +86,11 @@ public static class StartupExtensions
 		{
 			arianeSettings.UseMockForUnitTests = settings.UseMockForUnitTests;
 		}
+		if (settings.ServiceBusTransportType != defaultSettings.ServiceBusTransportType)
+		{
+			arianeSettings.ServiceBusTransportType = settings.ServiceBusTransportType;
+		}
+		
 
 		services.TryAddSingleton<ServiceBuSenderFactory>();
 		if (settings.UseMockForUnitTests)
@@ -111,7 +116,7 @@ public static class StartupExtensions
 		{
 			var serviceBusClient = new ServiceBusClient(arianeSettings.BusConnectionString, new ServiceBusClientOptions()
 			{
-				TransportType = ServiceBusTransportType.AmqpTcp,
+				TransportType = settings.ServiceBusTransportType,
 				RetryOptions = new ServiceBusRetryOptions()
 				{
 					Mode = ServiceBusRetryMode.Exponential,
@@ -141,6 +146,7 @@ public static class StartupExtensions
 				continue;
 			}
 			reader.IsRegistered = true;
+
 			services.AddSingleton<IHostedService>(sp =>
 			{
 				var readerType = reader.ReaderType;
