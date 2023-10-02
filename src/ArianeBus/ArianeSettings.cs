@@ -23,6 +23,7 @@ public class ArianeSettings
     public bool CreateSubscriptionIfNotExists { get; set; } = true;
 
     public bool UseMockForUnitTests { get; set; } = false;
+	public ServiceBusTransportType ServiceBusTransportType { get; set; } = ServiceBusTransportType.AmqpTcp;
 
     internal List<ReaderRegistration> ReaderList { get; set; } = new();
     internal Dictionary<string, QueueOrTopicBehaviorOptions> MessageSendOptionsList { get; set; } = new();

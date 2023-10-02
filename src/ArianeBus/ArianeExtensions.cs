@@ -87,7 +87,7 @@ public static class ArianeExtensions
 	{
 		var client = new ServiceBusClient(settings.BusConnectionString, new ServiceBusClientOptions
 		{
-			TransportType = ServiceBusTransportType.AmqpTcp,
+			TransportType = settings.ServiceBusTransportType,
 			RetryOptions = new ServiceBusRetryOptions()
 			{
 				Mode = ServiceBusRetryMode.Exponential,

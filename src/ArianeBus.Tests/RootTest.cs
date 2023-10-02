@@ -22,6 +22,7 @@ internal class RootTest
 						var settings = new ArianeSettings();
 						settings.BusConnectionString = cs!;
 						settings.SendStrategyName = $"{ArianeBus.SendStrategy.Bufferized}";
+						settings.ServiceBusTransportType = Azure.Messaging.ServiceBus.ServiceBusTransportType.AmqpWebSockets;
 						arianeConfig?.Invoke(settings);
 
 						services.AddArianeBus(settings);
