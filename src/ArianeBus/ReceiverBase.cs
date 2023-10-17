@@ -59,13 +59,17 @@ public abstract class ReceiverBase<T> : BackgroundService
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, ex.Message);
+				ex.Data["QueueOrTopicName"] = QueueOrTopicName;
+                _logger.LogError(ex, ex.Message);
 				break;
 			}
 
-			foreach (var receiveMessage in receiveMessageList)
+			if (receiveMessageList is not null)
 			{
-				await ProcessMessageAsync(receiveMessage, stoppingToken);
+				foreach (var receiveMessage in receiveMessageList)
+				{
+					await ProcessMessageAsync(receiveMessage, stoppingToken);
+				}
 			}
 		}
 	}
