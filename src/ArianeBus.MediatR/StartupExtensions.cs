@@ -1,8 +1,8 @@
-﻿using System.Reflection;
+﻿using ArianeBus.MediatR;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ArianeBus.MediatR;
+namespace ArianeBus;
 
 public static class StartupExtensions
 {

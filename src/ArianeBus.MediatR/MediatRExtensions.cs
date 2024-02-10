@@ -1,6 +1,7 @@
-﻿using MediatR;
+﻿using ArianeBus.MediatR;
 
-namespace ArianeBus.MediatR;
+namespace MediatR;
+
 public static class MediatRExtensions
 {
 	public static async Task GlobalPublish(this IMediator mediator, INotification notification, CancellationToken cancellationToken = default)

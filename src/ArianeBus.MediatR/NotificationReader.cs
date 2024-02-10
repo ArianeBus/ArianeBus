@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace ArianeBus.MediatR;
 internal class NotificationReader(
-	MediatRBusConfiguration configuration,
 	IMediator mediator,
 	ILogger<NotificationReader> logger
 	)
