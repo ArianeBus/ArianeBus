@@ -1,7 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using System.Runtime;
-
-namespace ArianeBus;
+﻿namespace ArianeBus;
 
 public static class ArianeExtensions
 {

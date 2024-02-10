@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <Version>1.0.1.0</Version>
+	  <PackageId>ArianeBus.MediatR</PackageId>
+	  <PackageProjectUrl>https://github.com/arianebus.mediatr/arianebus.mediatr</PackageProjectUrl>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <PublishRepositoryUrl>true</PublishRepositoryUrl>
+	  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+	  <PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription, Mediator, IMediatR, MediatR</PackageTags>
+	  <Description>Publish and Receive notification messages with Azure Bus and process it from MediatoR</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ArianeBus\ArianeBus.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="$(OutputPath)\ArianeBus.dll">
+			<BuildAction>None</BuildAction>
+			<PackagePath>lib\net80</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+	</ItemGroup>
+
+</Project>

@@ -1,35 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\ConsoleWriter\SampleMessageRequest.cs" Link="SampleMessageRequest.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="..\appSettings.local.json" Link="appSettings.local.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-	  <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\ArianeBus\ArianeBus.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <None Update="appSettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -38,5 +32,4 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>

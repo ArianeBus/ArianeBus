@@ -1,7 +1,4 @@
-﻿using System;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace ArianeBus;
 
@@ -15,7 +12,7 @@ internal class QueueReceiver<T> : ReceiverBase<T>, IQueueReader
 	{
 	}
 
-	
+
 	public Type MessageType { get; set; } = default!;
 	public Type ReaderType { get; set; } = default!;
 
