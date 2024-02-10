@@ -16,7 +16,7 @@ internal class NotificationReader(
 			logger.LogWarning("Received null message");
 			return;
 		}
-		var type = Type.GetType(message.NotificationFullTypeName);
+		var type = Type.GetType(message.NotificationFullTypeName, true, true);
 		if (type is null)
 		{
 			logger.LogWarning("Could not find type {NotificationFullTypeName}", message.NotificationFullTypeName);
