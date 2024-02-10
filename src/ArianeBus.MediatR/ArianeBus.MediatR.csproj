@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <Version>1.0.4.0</Version>
+	  <Version>1.0.5.1</Version>
 	  <PackageId>ArianeBus.MediatR</PackageId>
 	  <PackageProjectUrl>https://github.com/arianebus.mediatr/arianebus.mediatr</PackageProjectUrl>
 	  <IncludeSymbols>true</IncludeSymbols>
@@ -13,7 +13,8 @@
 	  <PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription, Mediator, IMediatR, MediatR</PackageTags>
 	  <Description>Publish and Receive notifications messages with Azure Bus and process it from MediatoR</Description>
 	  <PackageReleaseNotes>
-		  1.0.3.0 Use AssemblyQualifiedName
+		  1.0.5.1 Fix SerializedMessage
+		  1.0.4.0 Use AssemblyQualifiedName
 		  1.0.3.0 Improve Namespaces
 	  </PackageReleaseNotes>
   </PropertyGroup>

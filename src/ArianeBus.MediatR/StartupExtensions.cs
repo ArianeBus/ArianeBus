@@ -21,7 +21,7 @@ public static class StartupExtensions
 		services.AddSingleton(config);
 		services.AddMediatR(config =>
 		{
-			config.RegisterServicesFromAssemblies(typeof(StartupExtensions).Assembly);
+			config.RegisterServicesFromAssemblies(typeof(ArianeBus.MediatR.ArianeBusConfig).Assembly);
 		});
 		services.AddArianeBus(reg =>
 		{
