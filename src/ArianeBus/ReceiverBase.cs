@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ArianeBus;
+﻿namespace ArianeBus;
 
 public abstract class ReceiverBase<T> : BackgroundService
 {
@@ -28,13 +21,13 @@ public abstract class ReceiverBase<T> : BackgroundService
 
 	public string QueueOrTopicName { get; set; } = null!;
 
-    public override Task StartAsync(CancellationToken cancellationToken)
-    {
+	public override Task StartAsync(CancellationToken cancellationToken)
+	{
 		_logger.LogInformation("Start queue or topic {name} in background service", QueueOrTopicName);
-        return base.StartAsync(cancellationToken);
-    }
+		return base.StartAsync(cancellationToken);
+	}
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
@@ -60,7 +53,7 @@ public abstract class ReceiverBase<T> : BackgroundService
 			catch (Exception ex)
 			{
 				ex.Data["QueueOrTopicName"] = QueueOrTopicName;
-                _logger.LogError(ex, ex.Message);
+				_logger.LogError(ex, ex.Message);
 				break;
 			}
 
@@ -84,7 +77,7 @@ public abstract class ReceiverBase<T> : BackgroundService
 
 		try
 		{
-			var bodyContent= receiveMessage.Body.ToString();
+			var bodyContent = receiveMessage.Body.ToString();
 			var message = System.Text.Json.JsonSerializer.Deserialize<T>(bodyContent, JsonSerializer.Options)!;
 			await _reader!.ProcessMessageAsync(message, cancellationToken);
 		}

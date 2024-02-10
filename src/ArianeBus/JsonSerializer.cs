@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ArianeBus
 {
@@ -24,12 +19,6 @@ namespace ArianeBus
 			return options;
 		}, true);
 
-		public static System.Text.Json.JsonSerializerOptions Options
-		{
-			get
-			{
-				return _lazyOptions.Value;
-			}
-		}
+		public static System.Text.Json.JsonSerializerOptions Options => _lazyOptions.Value;
 	}
 }
