@@ -8,15 +8,24 @@ public static class StartupExtensions
 {
 	public static void AddMediatRBus(this IServiceCollection services, string topicName)
 	{
-		var config = new MediatRBusConfiguration { TopicName = topicName };
+		services.AddMediatRBus(config =>
+		{
+			config.TopicName = topicName;
+		});
+	}
+
+	public static void AddMediatRBus(this IServiceCollection services, Action<MediatRBusConfiguration> configure)
+	{
+		var config = new MediatRBusConfiguration();
+		configure(config);
 		services.AddSingleton(config);
 		services.AddMediatR(config =>
 		{
 			config.RegisterServicesFromAssemblies(typeof(StartupExtensions).Assembly);
 		});
-		services.AddArianeBus(services =>
+		services.AddArianeBus(reg =>
 		{
-			services.RegisterTopicReader<NotificationReader>(new TopicName(topicName), new SubscriptionName(config.SubscriptionName));
+			reg.RegisterTopicReader<NotificationReader>(new TopicName(config.TopicName), new SubscriptionName(config.SubscriptionName));
 		});
 	}
 }
