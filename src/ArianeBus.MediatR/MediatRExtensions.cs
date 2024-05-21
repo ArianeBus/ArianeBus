@@ -1,4 +1,8 @@
-﻿using ArianeBus.MediatR;
+﻿using System.Diagnostics;
+
+using ArianeBus.MediatR;
+
+using Microsoft.Extensions.Logging;
 
 namespace MediatR;
 
@@ -20,6 +24,13 @@ public static class MediatRExtensions
 			SerializedNotification = notifString,
 			NotificationFullTypeName = simplifiedAqn
 		};
+		if (busConfig.Configuration.DiagnosticMessageEnabled)
+		{
+			var logger = await mediator.Send(new GetLoggerRequest(), cancellationToken);
+			var stack = new StackTrace();
+			logger.LogDebug("Publishing notification {NotificationType} stack {TopFrame}", simplifiedAqn, stack.GetFrame(0));
+		}
+
 		await busConfig.Bus.PublishTopic(busConfig.Configuration.TopicName, message, cancellationToken: cancellationToken);
 	}
 }
