@@ -28,7 +28,7 @@ public static class MediatRExtensions
 		{
 			var logger = await mediator.Send(new GetLoggerRequest(), cancellationToken);
 			var stack = new StackTrace();
-			logger.LogDebug("Publishing notification {NotificationType} stack {TopFrame}", simplifiedAqn, stack.GetFrame(0));
+			logger.LogDebug("Publishing notification {NotificationType} stack {TopFrame}", simplifiedAqn, stack.ToString());
 		}
 
 		await busConfig.Bus.PublishTopic(busConfig.Configuration.TopicName, message, cancellationToken: cancellationToken);
