@@ -30,10 +30,10 @@ jobs:
       run: dotnet test ArianeBus.sln -c Release --no-build --verbosity normal
 
     - name: Pack ArianeBus
-      run: dotnet pack --no-build --configuration Release ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
+      run: dotnet pack --include-symbols --include-source --no-build --configuration Release ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
 
     - name: Pack ArianeBus MediatR
-      run: dotnet pack --no-build --configuration Release ${{github.workspace}}/src/ArianeBus.MediatR/ArianeBus.MediatR.csproj --output .
+      run: dotnet pack --include-symbols --include-source --no-build --configuration Release ${{github.workspace}}/src/ArianeBus.MediatR/ArianeBus.MediatR.csproj --output .
 
     - name: Push Nuget
       run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.nuget}} --skip-duplicate
