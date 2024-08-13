@@ -24,16 +24,16 @@ jobs:
       run: 7z x ${{github.workspace}}/src/appSettings.local.zip -p'${{secrets.localconfig}}' -o${{github.workspace}}/src/
 
     - name: Build
-      run: dotnet build ArianeBus.sln --configuration Release --no-restore
+      run: dotnet build ArianeBus.sln --configuration Debug --no-restore
 
     - name: Test
       run: dotnet test ArianeBus.sln -c Release --no-build --verbosity normal
 
     - name: Pack ArianeBus
-      run: dotnet pack --include-symbols --include-source --no-build --configuration Release ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
+      run: dotnet pack --include-symbols --include-source --no-build --configuration Debug ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
 
     - name: Pack ArianeBus MediatR
-      run: dotnet pack --include-symbols --include-source --no-build --configuration Release ${{github.workspace}}/src/ArianeBus.MediatR/ArianeBus.MediatR.csproj --output .
+      run: dotnet pack --include-symbols --include-source --no-build --configuration Debug ${{github.workspace}}/src/ArianeBus.MediatR/ArianeBus.MediatR.csproj --output .
 
     - name: Push Nuget
       run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.nuget}} --skip-duplicate
