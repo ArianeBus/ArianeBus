@@ -27,7 +27,7 @@ jobs:
       run: dotnet build ArianeBus.sln --configuration Debug --no-restore
 
     - name: Test
-      run: dotnet test ArianeBus.sln -c Release --no-build --verbosity normal
+      run: dotnet test ArianeBus.sln -c Debug --no-build --verbosity normal
 
     - name: Pack ArianeBus
       run: dotnet pack --include-symbols --include-source --no-build --configuration Debug ${{github.workspace}}/src/ArianeBus/ArianeBus.csproj --output .
