@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 
 namespace ArianeBus;
 
@@ -20,12 +13,12 @@ internal class SendBufferizedMessagesStrategy : SendMessageStrategyBase
 	public SendBufferizedMessagesStrategy(
 		ArianeSettings settings,
 		ILogger<SendBufferizedMessagesStrategy> logger)
-    {
+	{
 		_settings = settings;
 		_logger = logger;
 	}
 
-    public override string StrategyName => $"{SendStrategy.Bufferized}";
+	public override string StrategyName => $"{SendStrategy.Bufferized}";
 	private bool IsProcessing => _semaphore.CurrentCount < 1;
 
 	public override async Task TrySendRequest(ServiceBusSender sender, MessageRequest messageRequest, CancellationToken cancellationToken)

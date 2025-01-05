@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 
 namespace ArianeBus;
 
@@ -90,7 +89,7 @@ public static class StartupExtensions
 		{
 			arianeSettings.ServiceBusTransportType = settings.ServiceBusTransportType;
 		}
-		
+
 
 		services.TryAddSingleton<ServiceBuSenderFactory>();
 		if (settings.UseMockForUnitTests)
@@ -131,13 +130,13 @@ public static class StartupExtensions
 		{
 			if (reader.QueueType == QueueType.Queue)
 			{
-                arianeSettings.RegisterQueueReader(reader);
-            }
-            else if (reader.QueueType == QueueType.Topic)
+				arianeSettings.RegisterQueueReader(reader);
+			}
+			else if (reader.QueueType == QueueType.Topic)
 			{
-                arianeSettings.RegisterTopicReader(reader);
-            }
-        }
+				arianeSettings.RegisterTopicReader(reader);
+			}
+		}
 
 		foreach (var reader in arianeSettings.ReaderList)
 		{

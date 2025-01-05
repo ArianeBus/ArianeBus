@@ -23,7 +23,7 @@ public abstract class ReceiverBase<T> : BackgroundService
 
 	public override Task StartAsync(CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("Start queue or topic {name} in background service", QueueOrTopicName);
+		_logger.LogInformation("Start queue or topic {Name} in background service", QueueOrTopicName);
 		return base.StartAsync(cancellationToken);
 	}
 
@@ -48,13 +48,12 @@ public abstract class ReceiverBase<T> : BackgroundService
 				{
 					continue;
 				}
-				_logger.LogTrace("receive {count} messages on queue or topic {name}", receiveMessageList.Count, QueueOrTopicName);
+				_logger.LogTrace("receive {Count} messages on queue or topic {Name}", receiveMessageList.Count, QueueOrTopicName);
 			}
 			catch (Exception ex)
 			{
 				ex.Data["QueueOrTopicName"] = QueueOrTopicName;
 				_logger.LogError(ex, ex.Message);
-				break;
 			}
 
 			if (receiveMessageList is not null)
@@ -65,6 +64,7 @@ public abstract class ReceiverBase<T> : BackgroundService
 				}
 			}
 		}
+		_logger.LogInformation("Stop queue or topic {Name} in background service" , QueueOrTopicName);
 	}
 
 	protected async Task ProcessMessageAsync(ServiceBusReceivedMessage receiveMessage, CancellationToken cancellationToken)

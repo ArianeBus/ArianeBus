@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.1.16.0</Version>
+    <Version>1.1.17.0</Version>
     <PackageId>ArianeBus</PackageId>
     <PackageProjectUrl>https://github.com/arianebus/arianebus</PackageProjectUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -12,6 +12,7 @@
     <PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
     <Description>Send and Receive messages massively with Azure Bus</Description>
     <PackageReleaseNotes>
+			1.0.17.0 Fix break in receiver base
 			1.0.15.0 Add Pdb + src
 			1.0.14.0 Migrate to dotnet8
 			1.0.13.6 Fix TopicReceiver with task canceled
