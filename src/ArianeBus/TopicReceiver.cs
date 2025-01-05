@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace ArianeBus;
 
@@ -14,9 +13,9 @@ internal class TopicReceiver<T> : ReceiverBase<T>, ITopicReader
 
 	public string SubscriptionName { get; set; } = null!;
 	public Type ReaderType { get; set; } = null!;
-    public Type MessageType { get; set; } = null!;
+	public Type MessageType { get; set; } = null!;
 
-    public override async Task StartAsync(CancellationToken cancellationToken)
+	public override async Task StartAsync(CancellationToken cancellationToken)
 	{
 		await _settings.CreateTopicAndSubscriptionIfNotExists(QueueOrTopicName, SubscriptionName, _logger, cancellationToken);
 
@@ -45,7 +44,7 @@ internal class TopicReceiver<T> : ReceiverBase<T>, ITopicReader
 		_reader!.QueueOrTopicName = QueueOrTopicName;
 		_reader.FromSubscriptionName = SubscriptionName;
 
-		_logger.LogInformation("TopicReceiver<{type}> started for topic {topicName} with subscription {subscription}", typeof(T).Name, QueueOrTopicName, SubscriptionName);	
+		_logger.LogInformation("TopicReceiver<{type}> started for topic {topicName} with subscription {subscription}", typeof(T).Name, QueueOrTopicName, SubscriptionName);
 
 		await base.StartAsync(cancellationToken);
 	}

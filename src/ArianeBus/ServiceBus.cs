@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Threading;
-
-namespace ArianeBus;
+﻿namespace ArianeBus;
 
 internal class ServiceBus : IServiceBus
 {
@@ -14,7 +11,7 @@ internal class ServiceBus : IServiceBus
 		ILogger<ServiceBus> logger,
 		ArianeSettings settings,
 		ServiceBuSenderFactory serviceBuSenderFactory)
-    {
+	{
 		_senderStrategyList = senderStrategyList;
 		_logger = logger;
 		_settings = settings;

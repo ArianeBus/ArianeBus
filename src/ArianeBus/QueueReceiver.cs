@@ -31,7 +31,7 @@ internal class QueueReceiver<T> : ReceiverBase<T>, IQueueReader
 		_reader = ActivatorUtilities.CreateInstance(_serviceProvider, ReaderType) as MessageReaderBase<T>;
 		_reader!.QueueOrTopicName = QueueOrTopicName;
 
-		_logger.LogInformation("QueueReceiver<{type}> started for queue {queue}", typeof(T).Name, QueueOrTopicName);
+		_logger.LogInformation("QueueReceiver<{Type}> started for queue {Queue}", typeof(T).Name, QueueOrTopicName);
 
 		await base.StartAsync(cancellationToken);
 	}

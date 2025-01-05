@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
+﻿using System.Timers;
 
 namespace ArianeBus;
 
@@ -12,7 +7,7 @@ internal sealed class MessageBuffer : IDisposable
 	private readonly System.Timers.Timer _timeout = new(TimeSpan.FromSeconds(2));
 
 	public MessageBuffer()
-    {
+	{
 		_timeout.Elapsed += TimerElapsed;
 		_timeout.Start();
 	}
@@ -22,7 +17,7 @@ internal sealed class MessageBuffer : IDisposable
 	public Action<ServiceBusMessageBatch, MessageBuffer> OnTimeout = default!;
 	public bool IsProcessed { get; set; } = false;
 
-    private void TimerElapsed(object? source, ElapsedEventArgs e)
+	private void TimerElapsed(object? source, ElapsedEventArgs e)
 	{
 		if (OnTimeout is not null
 			&& !IsProcessed)
