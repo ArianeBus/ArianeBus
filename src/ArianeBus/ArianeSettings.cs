@@ -21,6 +21,7 @@ public class ArianeSettings
 
 	internal List<ReaderRegistration> ReaderList { get; set; } = new();
 	internal Dictionary<string, QueueOrTopicBehaviorOptions> MessageSendOptionsList { get; set; } = new();
+	internal AzureBusConnectionString AzureBusConnectionString { get; set; } = default!;
 
 	public ArianeSettings RegisterTopicReader<TReader>(TopicName topicName, SubscriptionName subscriptionName)
 		where TReader : IMessageReader

@@ -9,7 +9,7 @@ internal class SpeedMessageSender(
 {
 	public async Task EnqueueMessage(string queueName, object message, CancellationToken cancellationToken)
 	{
-		var cs = new AzureBusConnectionString(settings.BusConnectionString);
+		var cs = settings.AzureBusConnectionString;
 		string url = $"https://{cs.Namespace}.servicebus.windows.net/{queueName}/messages".ToLower();
 
 		var client = httpClientFactory.CreateClient("AzureBus");
@@ -24,7 +24,7 @@ internal class SpeedMessageSender(
 
 	public async Task PublishTopic(string topicName, object message, CancellationToken cancellationToken)
 	{
-		var cs = new AzureBusConnectionString(settings.BusConnectionString);
+		var cs = settings.AzureBusConnectionString;
 		string url = $"https://{cs.Namespace}.servicebus.windows.net/{topicName}/messages".ToLower();
 		var client = httpClientFactory.CreateClient("AzureBus");
 		var response = await client.PostAsJsonAsync(url, message, cancellationToken);

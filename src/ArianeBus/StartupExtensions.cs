@@ -189,5 +189,7 @@ public static class StartupExtensions
 		{
 			arianeSettings.RegisterQueueOrTopicBehaviorOptions(messageOption.Key, messageOption.Value);
 		}
+
+		arianeSettings.AzureBusConnectionString = new AzureBusConnectionString(arianeSettings.BusConnectionString);
 	}
 }
