@@ -14,6 +14,9 @@ public interface IServiceBus
 	Task PublishTopic<TMessage>(string topicName, TMessage message, MessageOptions? options = null, CancellationToken cancellationToken = default)
 		where TMessage : class;
 
+	Task SpeedPublishTopic<TMessage>(string topicName, TMessage message, CancellationToken cancellationToken = default)
+		where TMessage : class;
+
 	/// <summary>
 	/// Enqueue a message to a queue with a specific message options and cancellation token
 	/// </summary>
@@ -24,6 +27,9 @@ public interface IServiceBus
 	/// <param name="cancellationToken"></param>
 	/// <returns></returns>
 	Task EnqueueMessage<TMessage>(string queueName, TMessage message, MessageOptions? options = null, CancellationToken cancellationToken = default)
+		where TMessage : class;
+
+	Task SpeedEnqueueMessage<TMessage>(string queueName, TMessage message, CancellationToken cancellationToken = default)
 		where TMessage : class;
 
 	/// <summary>
