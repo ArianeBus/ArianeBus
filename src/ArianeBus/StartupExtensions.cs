@@ -28,7 +28,7 @@ public static class StartupExtensions
 
 		ArianeSettings? arianeSettings;
 
-		var registeredSettings = services.Where(i => i.ServiceType == typeof(ArianeSettings)).FirstOrDefault();
+		var registeredSettings = services.FirstOrDefault(i => i.ServiceType == typeof(ArianeSettings));
 		if (registeredSettings is null)
 		{
 			arianeSettings = new ArianeSettings();
@@ -38,6 +38,10 @@ public static class StartupExtensions
 		{
 			arianeSettings = (ArianeSettings)registeredSettings.ImplementationInstance!;
 		}
+
+		services.AddTransient<AzureBusTokenHandler>();
+		services.AddTransient<SpeedMessageSender>();
+		services.AddHttpClient("AzureBus").AddHttpMessageHandler<AzureBusTokenHandler>();
 
 		var defaultSettings = new ArianeSettings();
 
