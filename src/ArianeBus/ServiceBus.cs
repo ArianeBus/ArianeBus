@@ -6,23 +6,21 @@ internal class ServiceBus(
 	ArianeSettings settings,
 	ServiceBuSenderFactory serviceBuSenderFactory,
 	SpeedMessageSender speedMessageSender
-	) 
+	)
 	: IServiceBus
 {
-	private readonly ILogger _logger = logger;
-
 	public async Task PublishTopic<T>(string topicName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
 		where T : class
 	{
 		if (message == null)
 		{
-			_logger.LogWarning("request is null");
+			logger.LogWarning("request is null");
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(topicName))
 		{
-			_logger.LogWarning("topicName name is null");
+			logger.LogWarning("topicName name is null");
 			return;
 		}
 
@@ -40,7 +38,7 @@ internal class ServiceBus(
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, ex.Message);
+			logger.LogError(ex, ex.Message);
 		}
 	}
 
@@ -49,17 +47,24 @@ internal class ServiceBus(
 	{
 		if (message == null)
 		{
-			_logger.LogWarning("request is null");
+			logger.LogWarning("request is null");
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(topicName))
 		{
-			_logger.LogWarning("topicName name is null");
+			logger.LogWarning("topicName name is null");
 			return;
 		}
 
-		await speedMessageSender.PublishTopic(topicName, message, cancellationToken);
+		var messageRequest = new MessageRequest
+		{
+			Message = message,
+			QueueOrTopicName = $"{settings.PrefixName}{topicName}",
+			QueueType = QueueType.Topic,
+		};
+
+		await speedMessageSender.SendMessage(messageRequest, message, cancellationToken);
 	}
 
 	public async Task EnqueueMessage<T>(string queueName, T message, MessageOptions? options = null, CancellationToken cancellationToken = default)
@@ -67,13 +72,13 @@ internal class ServiceBus(
 	{
 		if (message == null)
 		{
-			_logger.LogWarning("request is null");
+			logger.LogWarning("request is null");
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(queueName))
 		{
-			_logger.LogWarning("queue name is null");
+			logger.LogWarning("queue name is null");
 			return;
 		}
 
@@ -93,17 +98,24 @@ internal class ServiceBus(
 	{
 		if (message == null)
 		{
-			_logger.LogWarning("request is null");
+			logger.LogWarning("request is null");
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(queueName))
 		{
-			_logger.LogWarning("queue name is null");
+			logger.LogWarning("queue name is null");
 			return;
 		}
 
-		await speedMessageSender.EnqueueMessage(queueName, message, cancellationToken);
+		var messageRequest = new MessageRequest
+		{
+			Message = message,
+			QueueOrTopicName = $"{settings.PrefixName}{queueName}",
+			QueueType = QueueType.Queue
+		};
+
+		await speedMessageSender.SendMessage(messageRequest, message, cancellationToken);
 	}
 
 
@@ -112,13 +124,13 @@ internal class ServiceBus(
 	{
 		if (message == null)
 		{
-			_logger.LogWarning("request is null");
+			logger.LogWarning("request is null");
 			return;
 		}
 
 		if (string.IsNullOrWhiteSpace(topicOrQueueName))
 		{
-			_logger.LogWarning("queue name is null");
+			logger.LogWarning("queue name is null");
 			return;
 		}
 
@@ -153,11 +165,11 @@ internal class ServiceBus(
 		try
 		{
 			await sendStrategy!.TrySendRequest(sender, messageRequest, cancellationToken);
-			_logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
+			logger.LogTrace("send {Message} in queue {QueueOrTopicName}", messageRequest.Message, messageRequest.QueueOrTopicName);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, ex.Message);
+			logger.LogError(ex, ex.Message);
 		}
 	}
 
@@ -201,7 +213,7 @@ internal class ServiceBus(
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, ex.Message);
+				logger.LogError(ex, ex.Message);
 			}
 
 			if (receiveMessageList is null
@@ -225,7 +237,7 @@ internal class ServiceBus(
 			{
 				if (receiveMessage.Body == null)
 				{
-					_logger.LogWarning("receive message with body null on queue {queueName}", receiver.EntityPath);
+					logger.LogWarning("receive message with body null on queue {queueName}", receiver.EntityPath);
 					continue;
 				}
 
@@ -237,7 +249,7 @@ internal class ServiceBus(
 				}
 				catch (Exception ex)
 				{
-					_logger.LogError(ex, "ErrorMessage : {message}", ex.Message);
+					logger.LogError(ex, "ErrorMessage : {message}", ex.Message);
 				}
 			}
 		}
@@ -248,19 +260,19 @@ internal class ServiceBus(
 	public async Task CreateQueue(QueueName queueName, CancellationToken cancellationToken = default)
 	{
 		var name = $"{settings.PrefixName}{queueName.Value}";
-		await settings.CreateQueueIfNotExists(name, _logger, cancellationToken);
+		await settings.CreateQueueIfNotExists(name, logger, cancellationToken);
 	}
 
 	public async Task CreateTopic(TopicName topicName, CancellationToken cancellationToken = default)
 	{
 		var name = $"{settings.PrefixName}{topicName.Value}";
-		await settings.CreateTopicIfNotExists(name, _logger, cancellationToken);
+		await settings.CreateTopicIfNotExists(name, logger, cancellationToken);
 	}
 
 	public async Task CreateTopicAndSubscription(TopicName topicName, SubscriptionName subscription, CancellationToken cancellationToken = default)
 	{
 		var name = $"{settings.PrefixName}{topicName.Value}";
-		await settings.CreateTopicAndSubscriptionIfNotExists(name, subscription.Value, _logger, cancellationToken);
+		await settings.CreateTopicAndSubscriptionIfNotExists(name, subscription.Value, logger, cancellationToken);
 	}
 
 	public async Task ClearQueue(QueueName queueName, CancellationToken cancellationToken = default)
@@ -289,7 +301,7 @@ internal class ServiceBus(
 
 			if (secureBreak > 10000)
 			{
-				_logger.LogWarning("Exit from infinite loop for queue {queueName}", queueName.Value);
+				logger.LogWarning("Exit from infinite loop for queue {queueName}", queueName.Value);
 				break;
 			}
 		}
@@ -321,7 +333,7 @@ internal class ServiceBus(
 
 			if (secureBreak > 10000)
 			{
-				_logger.LogWarning("Exit from infinite loop for topic {topicName} subscription {subscriptionName}", topicName.Value, subscriptionName.Value);
+				logger.LogWarning("Exit from infinite loop for topic {topicName} subscription {subscriptionName}", topicName.Value, subscriptionName.Value);
 				break;
 			}
 		}
@@ -332,31 +344,31 @@ internal class ServiceBus(
 	{
 		if (!await IsQueueExists(queueName, cancellationToken))
 		{
-			_logger.LogWarning("try to delete not existing queue {queueName}", queueName.Value);
+			logger.LogWarning("try to delete not existing queue {queueName}", queueName.Value);
 			return;
 		}
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
 		var response = await managementClient.DeleteQueueAsync(queueName.Value, cancellationToken);
-		_logger.LogInformation("Delete queue {queueName} with result {statusCode}", queueName, response.Status);
+		logger.LogInformation("Delete queue {queueName} with result {statusCode}", queueName, response.Status);
 	}
 
 	public async Task DeleteTopic(TopicName topicName, CancellationToken cancellationToken = default)
 	{
 		if (!await IsTopicExists(topicName, cancellationToken))
 		{
-			_logger.LogWarning("try to delete not existing topic {topicName}", topicName.Value);
+			logger.LogWarning("try to delete not existing topic {topicName}", topicName.Value);
 			return;
 		}
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
 		var response = await managementClient.DeleteTopicAsync(topicName.Value, cancellationToken);
-		_logger.LogInformation("Delete topic {topicName} with result {statusCode}", topicName, response.Status);
+		logger.LogInformation("Delete topic {topicName} with result {statusCode}", topicName, response.Status);
 	}
 
 	public async Task DeleteSubscription(TopicName topicName, SubscriptionName subscriptionName, CancellationToken cancellationToken = default)
 	{
 		var managementClient = new ServiceBusAdministrationClient(settings.BusConnectionString);
 		var response = await managementClient.DeleteSubscriptionAsync(topicName.Value, subscriptionName.Value, cancellationToken);
-		_logger.LogInformation("Delete subscription {subscriptionName} for topic {topicName} with result {statusCode}", subscriptionName, topicName, response.Status);
+		logger.LogInformation("Delete subscription {subscriptionName} for topic {topicName} with result {statusCode}", subscriptionName, topicName, response.Status);
 	}
 
 	public async Task<bool> IsQueueExists(QueueName queueName, CancellationToken cancellationToken = default)

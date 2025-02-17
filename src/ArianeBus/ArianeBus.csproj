@@ -10,8 +10,9 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageTags>Azure, Bus, Pub-Sub, Topic, Queue, Subscription</PackageTags>
     <Description>Send and Receive messages massively with Azure Bus</Description>
-    <Version>1.2.18.0</Version>
+    <Version>1.2.19.0</Version>
     <PackageReleaseNotes>
+			1.2.19.0 Add Mock to speed message for tests
 			1.2.18.0 Add Speed Topic and Queue
 			1.1.17.0 Fix break in receiver base
 			1.0.15.0 Add Pdb + src
